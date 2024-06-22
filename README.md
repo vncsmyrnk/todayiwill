@@ -5,7 +5,15 @@
 
 # todayiwill
 
-CLI app for describing and reminding what you must do today
+CLI app for describing and reminding what you must do today.
+
+## Run
+
+```bash
+wget https://github.com/vncsmyrnk/todayiwill/releases/latest/download/todayiwill
+chmod u+x todayiwill
+todayiwill --version
+```
 
 ## Development with docker
 
