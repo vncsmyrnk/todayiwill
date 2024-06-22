@@ -11,6 +11,10 @@
 
 use clap::{Parser, Subcommand};
 
+mod appointment;
+
+use crate::appointment::list;
+
 /// A CLI for remembering what you need to do today
 #[derive(Debug, Parser)]
 #[command(name = "todayiwill")]
@@ -36,7 +40,7 @@ fn main() {
             println!("Add action to be implemented.")
         }
         Commands::List => {
-            println!("List action to be implemented.")
+            list::display_list();
         }
     }
 }
