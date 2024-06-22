@@ -30,7 +30,7 @@ jobs:
       - name: Set version
         uses: mikefarah/yq@master
         with:
-          cmd: yq -i '.version = "${{ github.ref_name }}"' 'Cargo.toml'
+          cmd: yq -i '.version = "${{ github.ref_name }}"' 'todayiwill/Cargo.toml'
 
       - name: Build
         run: cargo build --release
