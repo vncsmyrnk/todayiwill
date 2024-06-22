@@ -32,9 +32,6 @@ jobs:
           VERSION=${{ github.ref_name }}
           sed -i "s/^version =.*/version = \"${VERSION:1}\"/g" Cargo.toml
 
-      - name: Version check
-        run: cat Cargo.toml
-
       - name: Build
         run: cargo build --release
 
@@ -47,27 +44,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Build Changelog
-        id: github_release
-        uses: mikepenz/release-changelog-builder-action@v4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          body: |
-            # Changelog
-
-            ${{ steps.github_release.outputs.changelog }}
-          draft: true
-          prerelease: false
-
       - name: Download artifact
         id: download-artifact
         uses: actions/download-artifact@v4
@@ -78,9 +54,20 @@ jobs:
       - name: List artifacts generated
         run: ls ./artifacts/**/*
 
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Upload linux executable to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./artifacts/todayiwill
           file_glob: true
+          draft: true
+          body: |
+            # Changelog
+
+            ${{ steps.github_release.outputs.changelog }}
