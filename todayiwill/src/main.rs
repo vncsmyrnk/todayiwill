@@ -34,7 +34,7 @@ fn main() {
     match args.command {
         Commands::Add => {
             println!("Add action to be implemented.")
-        },
+        }
         Commands::List => {
             println!("List action to be implemented.")
         }

@@ -17,11 +17,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Add clippy
-        run: rustup component add clippy
+      - name: Add rust packages
+        run: rustup component add clippy rustfmt
 
-      - name: Lint
+      - name: Format check
+        run: cargo fmt --check
+
+      - name: Lint Check
         run: cargo clippy
 
-      - name: Build project
+      - name: Build Check
         run: cargo build
