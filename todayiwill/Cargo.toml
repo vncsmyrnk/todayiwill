@@ -1,0 +1,8 @@
+[package]
+name = "todayiwill"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.7", features = ["derive"] }
+clippy = "0.0.302"

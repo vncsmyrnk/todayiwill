@@ -1,0 +1,27 @@
+name: CI workflow
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    container: rust:1.79-slim
+    defaults:
+      run:
+        working-directory: ./todayiwill
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint
+        run: cargo clippy
+
+      - name: Build project
+        run: cargo build

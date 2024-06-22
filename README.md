@@ -1,3 +1,5 @@
+![Rust](https://img.shields.io/badge/rust-%23000000.svg?style=for-the-badge&logo=rust&logoColor=white)
+
 # todayiwill
 
 CLI app for describing and reminding what you must do today
