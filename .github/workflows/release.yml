@@ -28,7 +28,9 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Set version
-        run: sed -i "s/^version =.*/version = \"${{ github.ref_name }}\"/g" Cargo.toml
+        run: |
+          VERSION=${{ github.ref_name }}
+          sed -i "s/^version =.*/version = \"${VERSION:1}\"/g" Cargo.toml
 
       - name: Version check
         run: cat Cargo.toml
