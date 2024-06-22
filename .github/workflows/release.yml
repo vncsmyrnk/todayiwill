@@ -44,6 +44,12 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -52,6 +58,10 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: ${{ github.ref }}
+          body: |
+            # Changelog
+
+            ${{ steps.github_release.outputs.changelog }}
           draft: true
           prerelease: false
 
