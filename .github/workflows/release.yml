@@ -32,6 +32,9 @@ jobs:
         with:
           cmd: yq -i '.version = "${{ github.ref_name }}"' 'todayiwill/Cargo.toml'
 
+      - name: Version check
+        run: cat Cargo.toml
+
       - name: Build
         run: cargo build --release
 
