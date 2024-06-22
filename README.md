@@ -10,5 +10,5 @@ docker run --rm -it \
     -v ~/.ssh:/root/.ssh \
     --cpus 2 \
     --workdir /opt/app \
-    rust:1.79-slim
+    rust:1.79-slim bash
 ```
