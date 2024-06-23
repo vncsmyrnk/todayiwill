@@ -10,6 +10,7 @@
 // notifications
 
 use clap::{Parser, Subcommand};
+extern crate dirs;
 
 mod appointment;
 
@@ -40,6 +41,7 @@ fn main() {
             println!("Add action to be implemented.")
         }
         Commands::List => {
+            print!("{:?}", dirs::data_dir().unwrap());
             list::display_list();
         }
     }
