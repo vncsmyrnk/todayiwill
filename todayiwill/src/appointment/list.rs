@@ -1,4 +1,4 @@
-// use std::{fs::File, io::{self, Read}, path::Path};
+use std::{fs::File, io::{self, Read}, path::Path};
 
 use crate::appointment::AppointmentTime;
 
@@ -22,13 +22,14 @@ pub fn get_appointments() -> Vec<Appointment> {
     ]
 }
 
-// fn read_file_content(file_path: &str) -> Result<String, io::Error> {
-//     let mut file_content = String::new();
-//     File::open(file_path)?.read_to_string(&mut file_content)?;
-//     Ok(file_content)
-// }
-//
-// fn parse_file_content(file_content: String) -> Vec<String> {
-//     let appointment = file_content.lines().map(|item: &str| { item.to_string() }).collect();
-//     appointment
-// }
+fn read_file_content(file_path: &str) -> Result<Vec<String>, io::Error> {
+    let mut file_content = String::new();
+    File::open(file_path)?.read_to_string(&mut file_content)?;
+    let appointments: Vec<String> = file_content.lines().map(parse_file_line).collect();
+    Ok(appointments)
+}
+
+
+fn parse_file_line(line: &str) -> String {
+    line.to_string()
+}
