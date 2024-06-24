@@ -3,6 +3,8 @@ use std::path::PathBuf;
 
 extern crate dirs;
 
+pub mod add;
+pub mod helper;
 pub mod list;
 
 pub struct Config {
@@ -11,8 +13,8 @@ pub struct Config {
 
 impl Config {
     pub fn default() -> Self {
-        let base_dir = dirs::data_dir().unwrap().join(String::from("todayiwill"));
-        let appointments_path = base_dir.join(String::from("appointments.txt"));
+        let base_dir = dirs::data_dir().unwrap().join("todayiwill");
+        let appointments_path = base_dir.join("appointments.txt");
         Self {
             appointments_path: Box::new(appointments_path),
         }
