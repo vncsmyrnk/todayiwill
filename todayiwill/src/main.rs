@@ -53,7 +53,7 @@ fn main() {
                 None => {
                     println!("You entered a non-valid time.");
                     return;
-                },
+                }
             };
             add::add_appointment(
                 Appointment::new(
