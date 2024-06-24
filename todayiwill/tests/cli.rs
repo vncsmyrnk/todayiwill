@@ -1,4 +1,4 @@
-use std::{fs::remove_file, fs::File, io::Write};
+use std::{fs::create_dir_all, fs::remove_file, fs::File, io::Write};
 
 use assert_cmd::Command;
 
@@ -13,10 +13,9 @@ fn helper_remove_data_file() {
 }
 
 fn helper_write_to_data_file(content: &[u8]) {
-    let appointments_path = dirs::data_dir()
-        .unwrap()
-        .join(String::from("todayiwill"))
-        .join(String::from("appointments.txt"));
+    let base_dir = dirs::data_dir().unwrap().join(String::from("todayiwill"));
+    create_dir_all(base_dir.to_str().unwrap()).expect("Failed to create data dir");
+    let appointments_path = base_dir.join(String::from("appointments.txt"));
     let mut file =
         File::create(appointments_path.to_str().unwrap()).expect("Failed to create test file");
     file.write_all(content)
