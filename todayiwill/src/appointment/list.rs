@@ -7,7 +7,6 @@ use super::{Appointment, Config};
 /// Displays the list of appointments in the standard output
 pub fn display_list(config: Config) {
     let appointments = get_appointments_from_file(&config.appointments_path);
-    println!("{:?}", &config.appointments_path);
     if appointments.is_empty() {
         println!("There are no appointments added for today")
     }
@@ -47,7 +46,7 @@ fn parse_file_line(line: &str) -> Option<Appointment> {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs::File, io::Write, path::PathBuf};
+    use std::{fs::remove_file, fs::File, io::Write, path::PathBuf};
 
     use crate::appointment::{
         list::{get_appointments_from_file, parse_file_line},
@@ -90,7 +89,7 @@ mod tests {
                 Appointment::new("Visit grandma".to_string(), AppointmentTime::new(12, 45)),
             ]
         );
-        std::fs::remove_file(test_file_path).expect("Failed to delete test file");
+        remove_file(test_file_path).expect("Failed to delete test file");
     }
 
     #[test]
