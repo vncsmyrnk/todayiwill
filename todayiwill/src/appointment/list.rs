@@ -2,7 +2,7 @@ use std::{fs, path::PathBuf};
 
 use crate::appointment::AppointmentTime;
 
-use super::{Appointment, Config};
+use super::{helper, Appointment, Config};
 
 /// Displays the list of appointments in the standard output
 pub fn display_list(config: Config) {
@@ -32,11 +32,7 @@ pub fn get_appointments_from_file(path: &PathBuf) -> Vec<Appointment> {
 /// Parses a string representing a file line and return an appointment
 fn parse_file_line(line: &str) -> Option<Appointment> {
     let time: String = line.chars().take(5).collect();
-    let (hour, minutes): (i32, i32) = time.split_once(':').and_then(|(hour_str, minute_str)| {
-        let hour = hour_str.parse().ok()?;
-        let minutes = minute_str.parse().ok()?;
-        Some((hour, minutes))
-    })?;
+    let (hour, minutes): (i32, i32) = helper::parse_time(&time)?;
     let description = line.chars().skip(6).collect();
     Some(Appointment::new(
         description,

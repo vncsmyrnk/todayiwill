@@ -9,7 +9,7 @@
 // Save in files
 // notifications
 
-use appointment::{add, Appointment, AppointmentTime, Config};
+use appointment::{add, helper, Appointment, AppointmentTime, Config};
 use clap::{Parser, Subcommand};
 extern crate dirs;
 
@@ -29,7 +29,15 @@ struct Cli {
 #[derive(Debug, Subcommand)]
 enum Commands {
     /// Add appointment
-    Add,
+    Add {
+        /// Appointment description
+        #[arg(short, long)]
+        description: String,
+
+        /// Appointment time
+        #[arg(short, long)]
+        time: String,
+    },
     /// List the appointments to come
     List,
 }
@@ -38,10 +46,20 @@ fn main() {
     let args = Cli::parse();
 
     match args.command {
-        Commands::Add => add::add_appointment(
-            Appointment::new(String::from("Example"), AppointmentTime::new(1, 2)),
-            Config::default(),
-        ),
+        Commands::Add { description, time } => {
+            let result = helper::parse_time(&time);
+            let (hour, minutes) = match result {
+                Some((hour, minutes)) => (hour, minutes),
+                None => panic!("You entered a non-valid time."),
+            };
+            add::add_appointment(
+                Appointment::new(
+                    String::from(description),
+                    AppointmentTime::new(hour, minutes),
+                ),
+                Config::default(),
+            )
+        }
         Commands::List => list::display_list(Config::default()),
     }
 }

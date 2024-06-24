@@ -4,6 +4,7 @@ use std::path::PathBuf;
 extern crate dirs;
 
 pub mod add;
+pub mod helper;
 pub mod list;
 
 pub struct Config {

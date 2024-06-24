@@ -23,7 +23,7 @@ fn helper_write_to_data_file(content: &[u8]) {
 }
 
 #[test]
-fn list() {
+fn cli_usage() {
     helper_remove_data_file();
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -39,5 +39,21 @@ fn list() {
         .assert()
         .success()
         .stdout("14:45 Listen to music\n08:12 Call mom\n");
+    helper_remove_data_file();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--description", "A certain event", "--time", "16:50"])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list"])
+        .assert()
+        .success()
+        .stdout("16:50 A certain event\n");
+
     helper_remove_data_file();
 }
