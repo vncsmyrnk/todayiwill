@@ -40,9 +40,6 @@ fn main() {
         Commands::Add => {
             println!("Add action to be implemented.")
         }
-        Commands::List => {
-            print!("{:?}", dirs::data_dir().unwrap());
-            list::display_list();
-        }
+        Commands::List => list::display_list(appointment::Config::default()),
     }
 }

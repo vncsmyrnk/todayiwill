@@ -1,38 +1,36 @@
-use std::{
-    fs::File,
-    io::{self, Read},
-};
+use std::{fs::read_to_string, path::PathBuf};
 
 use crate::appointment::AppointmentTime;
 
-use super::Appointment;
+use super::{Appointment, Config};
 
 /// Displays the list of appointments in the standard output
-pub fn display_list() {
-    let appointments = get_appointments();
+pub fn display_list(config: Config) {
+    let appointments = get_appointments_from_file(&config.appointments_path);
+    println!("{:?}", &config.appointments_path);
+    if appointments.is_empty() {
+        println!("There are no appointments added for today")
+    }
     for appointment in &appointments {
-        println!("{}", appointment);
+        println!("{}", appointment)
     }
 }
 
 /// Get the string version of the list of appointments
 /// Should read the appointments of a specific file and return a list
 /// of appointments
-pub fn get_appointments() -> Vec<Appointment> {
-    vec![
-        Appointment::new("Do homework".to_string(), AppointmentTime::new(15, 45)),
-        Appointment::new("Feed the cat".to_string(), AppointmentTime::new(8, 30)),
-    ]
-}
-
-fn read_file_content(file_path: &str) -> Result<Vec<Appointment>, io::Error> {
-    let mut file_content = String::new();
-    File::open(file_path)?.read_to_string(&mut file_content)?;
+fn get_appointments_from_file(path: &PathBuf) -> Vec<Appointment> {
+    let file_result = read_to_string(path);
+    let file_content = match file_result {
+        Ok(content) => content,
+        Err(..) => String::new(),
+    };
     let appointments: Vec<Option<Appointment>> =
         file_content.lines().map(parse_file_line).collect();
-    Ok(appointments.into_iter().flatten().collect())
+    appointments.into_iter().flatten().collect()
 }
 
+/// Parses a string representing a file line and return an appointment
 fn parse_file_line(line: &str) -> Option<Appointment> {
     let time: String = line.chars().take(5).collect();
     let (hour, minutes): (i32, i32) = time.split_once(':').and_then(|(hour_str, minute_str)| {
@@ -49,10 +47,10 @@ fn parse_file_line(line: &str) -> Option<Appointment> {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs::File, io::Write};
+    use std::{fs::File, io::Write, path::PathBuf};
 
     use crate::appointment::{
-        list::{parse_file_line, read_file_content},
+        list::{get_appointments_from_file, parse_file_line},
         Appointment, AppointmentTime,
     };
 
@@ -79,11 +77,12 @@ mod tests {
 
     #[test]
     fn parse_file_contents() {
-        let test_file_path = "/tmp/test_file.txt";
-        let mut file = File::create(test_file_path).expect("Failed to create test file");
+        let test_file_path = PathBuf::from("/tmp/test_file.txt");
+        let mut file =
+            File::create(test_file_path.to_str().unwrap()).expect("Failed to create test file");
         file.write_all(b"22:00 Go to night shift\n12:45 Visit grandma\n212 Nonsense")
             .expect("Failed to write to test file");
-        let result = read_file_content(test_file_path).expect("Failed to read test file");
+        let result = get_appointments_from_file(&test_file_path);
         assert_eq!(
             result,
             vec![
@@ -95,8 +94,9 @@ mod tests {
     }
 
     #[test]
-    fn parse_non_existent_file_should_err() {
-        let result = read_file_content("Non-existent.txt");
-        assert!(result.is_err());
+    fn parse_file_non_existent() {
+        let test_file_path = PathBuf::from("/tmp/non_existent.txt");
+        let result = get_appointments_from_file(&test_file_path);
+        assert_eq!(result, vec![]);
     }
 }

@@ -1,6 +1,23 @@
 use core::fmt;
+use std::path::PathBuf;
+
+extern crate dirs;
 
 pub mod list;
+
+pub struct Config {
+    pub appointments_path: Box<PathBuf>,
+}
+
+impl Config {
+    pub fn default() -> Self {
+        let base_dir = dirs::data_dir().unwrap().join(String::from("todayiwill"));
+        let appointments_path = base_dir.join(String::from("appointments.txt"));
+        Self {
+            appointments_path: Box::new(appointments_path),
+        }
+    }
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct AppointmentTime {
