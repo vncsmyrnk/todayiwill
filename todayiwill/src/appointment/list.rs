@@ -1,4 +1,4 @@
-use std::{fs::read_to_string, path::PathBuf};
+use std::{fs, path::PathBuf};
 
 use crate::appointment::AppointmentTime;
 
@@ -18,8 +18,8 @@ pub fn display_list(config: Config) {
 /// Get the string version of the list of appointments
 /// Should read the appointments of a specific file and return a list
 /// of appointments
-fn get_appointments_from_file(path: &PathBuf) -> Vec<Appointment> {
-    let file_result = read_to_string(path);
+pub fn get_appointments_from_file(path: &PathBuf) -> Vec<Appointment> {
+    let file_result = fs::read_to_string(path);
     let file_content = match file_result {
         Ok(content) => content,
         Err(..) => String::new(),
@@ -46,7 +46,7 @@ fn parse_file_line(line: &str) -> Option<Appointment> {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs::remove_file, fs::File, io::Write, path::PathBuf};
+    use std::{fs, fs::File, io::Write, path::PathBuf};
 
     use crate::appointment::{
         list::{get_appointments_from_file, parse_file_line},
@@ -76,7 +76,10 @@ mod tests {
 
     #[test]
     fn parse_file_contents() {
-        let test_file_path = PathBuf::from("/tmp/test_file.txt");
+        let test_file_path = PathBuf::from("/tmp")
+            .join("todayilearn-test-list")
+            .join("appointments.txt");
+        fs::create_dir_all(test_file_path.parent().unwrap()).expect("Failed to create test dir");
         let mut file =
             File::create(test_file_path.to_str().unwrap()).expect("Failed to create test file");
         file.write_all(b"22:00 Go to night shift\n12:45 Visit grandma\n212 Nonsense")
@@ -89,7 +92,7 @@ mod tests {
                 Appointment::new("Visit grandma".to_string(), AppointmentTime::new(12, 45)),
             ]
         );
-        remove_file(test_file_path).expect("Failed to delete test file");
+        fs::remove_file(test_file_path).expect("Failed to delete test file");
     }
 
     #[test]

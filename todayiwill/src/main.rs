@@ -9,6 +9,7 @@
 // Save in files
 // notifications
 
+use appointment::{add, Appointment, AppointmentTime, Config};
 use clap::{Parser, Subcommand};
 extern crate dirs;
 
@@ -37,9 +38,10 @@ fn main() {
     let args = Cli::parse();
 
     match args.command {
-        Commands::Add => {
-            println!("Add action to be implemented.")
-        }
-        Commands::List => list::display_list(appointment::Config::default()),
+        Commands::Add => add::add_appointment(
+            Appointment::new(String::from("Example"), AppointmentTime::new(1, 2)),
+            Config::default(),
+        ),
+        Commands::List => list::display_list(Config::default()),
     }
 }
