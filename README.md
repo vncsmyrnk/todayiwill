@@ -7,15 +7,31 @@
 [![contributions](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/vncsmyrnk/todayiwill/issues)
 [![Issue count](https://img.shields.io/github/issues-search?query=repo%3Avncsmyrnk%2Ftodayiwill%20is%3Aopen&label=open%20issues)](https://github.com/vncsmyrnk/todayiwill/issues)
 
-CLI app for describing and reminding what you must do today.
+A CLI reminder app that offers a simple yet powerful solution to enhance productivity and ensure that you stay on top of your daily responsibilities. Unlike complex project management tools, a CLI app provides a lightweight and straightforward interface that integrates seamlessly into the workflows of developers, system administrators, and tech-savvy users who spend a significant portion of their day in the terminal.
 
-## Run
+## Installation
 
 ```bash
 wget https://github.com/vncsmyrnk/todayiwill/releases/latest/download/todayiwill
 chmod u+x todayiwill
 todayiwill --version
 ```
+
+## Examples
+
+```bash
+$ todayiwill add --description "Take my dog to the vet" --time "14:00"
+Appointment added successfully
+```
+
+```bash
+$ todayiwill list
+14:00 Take my dog to the vet
+```
+
+## Coming soon...
+
+Check the [opened issues](https://github.com/vncsmyrnk/todayiwill/issues) section to know what will soon be available.
 
 ## Development with docker
 

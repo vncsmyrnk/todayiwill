@@ -46,7 +46,7 @@ fn cli_usage() {
         .args(["add", "--description", "A certain event", "--time", "16:50"])
         .assert()
         .success()
-        .stdout("Appointment added successfully\n");
+        .stdout("Appointment added successfully.\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
