@@ -2,6 +2,7 @@ use core::fmt;
 
 pub mod list;
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct AppointmentTime {
     pub hour: i32,
     pub minutes: i32,
@@ -19,6 +20,7 @@ impl fmt::Display for AppointmentTime {
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct Appointment {
     pub description: String,
     pub time: AppointmentTime,
@@ -32,6 +34,6 @@ impl Appointment {
 
 impl fmt::Display for Appointment {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", self.description, self.time)
+        write!(f, "{} {}", self.time, self.description)
     }
 }
