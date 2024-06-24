@@ -10,6 +10,11 @@
 // notifications
 
 use clap::{Parser, Subcommand};
+extern crate dirs;
+
+mod appointment;
+
+use crate::appointment::list;
 
 /// A CLI for remembering what you need to do today
 #[derive(Debug, Parser)]
@@ -35,8 +40,6 @@ fn main() {
         Commands::Add => {
             println!("Add action to be implemented.")
         }
-        Commands::List => {
-            println!("List action to be implemented.")
-        }
+        Commands::List => list::display_list(appointment::Config::default()),
     }
 }
