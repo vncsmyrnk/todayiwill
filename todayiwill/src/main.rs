@@ -56,10 +56,7 @@ fn main() {
                 }
             };
             add::add_appointment(
-                Appointment::new(
-                    String::from(description),
-                    AppointmentTime::new(hour, minutes),
-                ),
+                Appointment::new(description, AppointmentTime::new(hour, minutes)),
                 Config::default(),
             )
         }

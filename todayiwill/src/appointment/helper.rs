@@ -1,7 +1,7 @@
 /// Parses string time (hours and minutes) and returns a tuple with both values
 /// `10:43` -> Option<(10, 43)>
 pub fn parse_time(time: &str) -> Option<(i32, i32)> {
-    let (hour_str, minutes_str) = time.split_once(":")?;
+    let (hour_str, minutes_str) = time.split_once(':')?;
     let hour = hour_str.parse().ok()?;
     let minutes = minutes_str.parse().ok()?;
     Some((hour, minutes))

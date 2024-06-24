@@ -22,7 +22,7 @@ fn write_appointments_to_file(
     path: &PathBuf,
 ) -> Result<(), io::Error> {
     fs::create_dir_all(path.parent().unwrap())?;
-    let file = File::create(&path)?;
+    let file = File::create(path)?;
     let mut writer = BufWriter::new(file);
     for appointment in appointments {
         writeln!(writer, "{}", appointment)?;
