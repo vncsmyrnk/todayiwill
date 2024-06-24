@@ -55,5 +55,12 @@ fn cli_usage() {
         .success()
         .stdout("16:50 A certain event\n");
 
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--description", "A certain event", "--time", "9:y3"])
+        .assert()
+        .success()
+        .stdout("You entered a non-valid time.\n");
+
     helper_remove_data_file();
 }

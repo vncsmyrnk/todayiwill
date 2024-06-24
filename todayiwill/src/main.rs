@@ -50,7 +50,10 @@ fn main() {
             let result = helper::parse_time(&time);
             let (hour, minutes) = match result {
                 Some((hour, minutes)) => (hour, minutes),
-                None => panic!("You entered a non-valid time."),
+                None => {
+                    println!("You entered a non-valid time.");
+                    return;
+                },
             };
             add::add_appointment(
                 Appointment::new(
