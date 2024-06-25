@@ -32,8 +32,20 @@ jobs:
       - name: Build Check
         run: cargo build
 
+  coverage:
+    runs-on: ubuntu-latest
+    container: rust:1.79-slim
+    defaults:
+      run:
+        working-directory: ./todayiwill
+    steps:
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
+
+      - name: Install dependencies for Codecov
+        run: >
+          apt-get install --no-install-recommends --yes
+          ca-certificates curl git gpg gpg-agent
 
       - name: Generate code coverage
         run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
