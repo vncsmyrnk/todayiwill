@@ -45,8 +45,8 @@ mod tests {
         let path = base_path.join("test_file.txt");
         write_appointments_to_file(
             vec![
-                Appointment::new(String::from("Call aunt Anna"), AppointmentTime::new(15, 46)),
-                Appointment::new(String::from("Buy new cup"), AppointmentTime::new(16, 56)),
+                Appointment::new(String::from("Call aunt Anna"), AppointmentTime::new(15, 46).unwrap()),
+                Appointment::new(String::from("Buy new cup"), AppointmentTime::new(16, 56).unwrap()),
             ],
             &path,
         )

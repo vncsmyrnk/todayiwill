@@ -47,8 +47,16 @@ fn main() {
                     return;
                 }
             };
+
+            let appointment_time = match AppointmentTime::new(hour, minutes) {
+                Ok(at) => at,
+                Err(error) => {
+                    println!("Appointment time invalid. {}", error);
+                    return;
+                }
+            };
             add::add_appointment(
-                Appointment::new(description, AppointmentTime::new(hour, minutes)),
+                Appointment::new(description, appointment_time),
                 config,
             )
         }

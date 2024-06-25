@@ -34,9 +34,13 @@ fn parse_file_line(line: &str) -> Option<Appointment> {
     let time: String = line.chars().take(5).collect();
     let (hour, minutes): (i32, i32) = helper::parse_time(&time)?;
     let description = line.chars().skip(6).collect();
+    let appointment_time = match AppointmentTime::new(hour, minutes) {
+        Ok(at) => at,
+        Err(..) => return None,
+    };
     Some(Appointment::new(
         description,
-        AppointmentTime::new(hour, minutes),
+        appointment_time
     ))
 }
 
@@ -65,7 +69,7 @@ mod tests {
     }
 
     #[test]
-    fn pase_malformed_line_time_fail() {
+    fn parse_malformed_line_time_fail() {
         let result = parse_file_line("10:0 This is an incorrect example");
         assert!(result.is_none());
     }
@@ -84,8 +88,8 @@ mod tests {
         assert_eq!(
             result,
             vec![
-                Appointment::new("Go to night shift".to_string(), AppointmentTime::new(22, 0)),
-                Appointment::new("Visit grandma".to_string(), AppointmentTime::new(12, 45)),
+                Appointment::new("Go to night shift".to_string(), AppointmentTime::new(22, 0).unwrap()),
+                Appointment::new("Visit grandma".to_string(), AppointmentTime::new(12, 45).unwrap()),
             ]
         );
         fs::remove_file(test_file_path).expect("Failed to delete test file");

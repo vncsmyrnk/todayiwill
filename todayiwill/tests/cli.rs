@@ -93,5 +93,19 @@ fn cli_usage() {
         .success()
         .stdout("There are no appointments added for today.\n");
 
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--description", "An urgent event", "--time", "24:10"])
+        .assert()
+        .success()
+        .stdout("Appointment time invalid. Hour should be between 0 and 23\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--description", "An urgent event", "--time", "15:60"])
+        .assert()
+        .success()
+        .stdout("Appointment time invalid. Minutes should be between 0 and 59\n");
+
     helper_remove_data_file();
 }
