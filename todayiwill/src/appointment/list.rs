@@ -8,7 +8,7 @@ use super::{helper, Appointment, Config};
 pub fn display_list(config: Config) {
     let appointments = get_appointments_from_file(&config.appointments_path);
     if appointments.is_empty() {
-        println!("There are no appointments added for today")
+        println!("There are no appointments added for today.")
     }
     for appointment in &appointments {
         println!("{}", appointment)
