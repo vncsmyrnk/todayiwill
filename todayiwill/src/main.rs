@@ -1,12 +1,13 @@
 use std::process;
 
-use appointment::{add, clear, helper, Appointment, AppointmentTime, Config};
 use clap::{Parser, Subcommand};
+
+extern crate chrono;
 extern crate dirs;
 
 mod appointment;
 
-use crate::appointment::list;
+use appointment::{add, clear, helper, list, Appointment, AppointmentTime, Config};
 
 /// A CLI for remembering what you need to do today
 #[derive(Debug, Parser)]
@@ -32,7 +33,15 @@ enum Commands {
     /// Clear all the appointments added until now
     Clear,
     /// List the appointments to come
-    List,
+    List {
+        /// Current time, defaults to system time
+        #[arg(short, long, value_parser=AppointmentTime::from, default_value_t=AppointmentTime::now())]
+        current_time: AppointmentTime,
+
+        /// If informed, all appointments are retrieved
+        #[arg(short, long, default_value_t = false)]
+        all: bool,
+    },
 }
 
 fn main() {
@@ -59,7 +68,13 @@ fn main() {
             };
             add::add_appointment(Appointment::new(description, appointment_time), config)
         }
-        Commands::List => list::display_list(config),
+        Commands::List { current_time, all } => {
+            let ref_time = match all {
+                true => None,
+                _ => Some(current_time),
+            };
+            list::display_list(ref_time, config)
+        }
         Commands::Clear => clear::clear_appointments(config),
     }
 }

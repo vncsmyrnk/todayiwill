@@ -1,6 +1,7 @@
 use std::{fs, fs::File, io::Write};
 
 use assert_cmd::Command;
+use serial_test::serial;
 
 fn helper_remove_data_file() {
     let appointments_path = dirs::data_dir()
@@ -23,7 +24,8 @@ fn helper_write_to_data_file(content: &[u8]) {
 }
 
 #[test]
-fn cli_usage() {
+#[serial]
+fn empty_list() {
     helper_remove_data_file();
 
     Command::cargo_bin("todayiwill")
@@ -32,16 +34,27 @@ fn cli_usage() {
         .assert()
         .success()
         .stdout("There are no appointments added for today.\n");
+}
 
+#[test]
+#[serial]
+fn list_appointments() {
+    helper_remove_data_file();
     helper_write_to_data_file(b"08:12 Call mom\n14:45 Listen to music\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["list"])
+        .args(["list", "--all"])
         .assert()
         .success()
         .stdout("08:12 Call mom\n14:45 Listen to music\n");
 
+    helper_remove_data_file();
+}
+
+#[test]
+#[serial]
+fn add_appointment() {
     helper_remove_data_file();
 
     Command::cargo_bin("todayiwill")
@@ -53,18 +66,18 @@ fn cli_usage() {
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["list"])
+        .args(["list", "--all"])
         .assert()
         .success()
         .stdout("16:50 A certain event\n");
 
-    Command::cargo_bin("todayiwill")
-        .unwrap()
-        .args(["add", "--description", "A certain event", "--time", "9:y3"])
-        .assert()
-        .failure()
-        .code(1)
-        .stdout("You entered a non-valid time.\n");
+    helper_remove_data_file();
+}
+
+#[test]
+#[serial]
+fn clear_appointments() {
+    helper_remove_data_file();
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -75,10 +88,10 @@ fn cli_usage() {
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["list"])
+        .args(["list", "--all"])
         .assert()
         .success()
-        .stdout("16:50 A certain event\n20:10 An urgent event\n");
+        .stdout("20:10 An urgent event\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -93,6 +106,69 @@ fn cli_usage() {
         .assert()
         .success()
         .stdout("There are no appointments added for today.\n");
+
+    helper_remove_data_file();
+}
+
+#[test]
+#[serial]
+fn list_current_time() {
+    helper_remove_data_file();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--description", "Clean bedroom", "--time", "19:00"])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--description", "Brush teeth", "--time", "22:30"])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--current-time", "10:00"])
+        .assert()
+        .success()
+        .stdout("19:00 Clean bedroom\n22:30 Brush teeth\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--current-time", "22:29"])
+        .assert()
+        .success()
+        .stdout("22:30 Brush teeth\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--current-time", "22:30"])
+        .assert()
+        .success()
+        .stdout("There are no appointments added for today.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--current-time", "22:30", "--all"])
+        .assert()
+        .success()
+        .stdout("19:00 Clean bedroom\n22:30 Brush teeth\n");
+
+    helper_remove_data_file();
+}
+
+#[test]
+fn invalid_entries() {
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--description", "A certain event", "--time", "9:y3"])
+        .assert()
+        .failure()
+        .code(1)
+        .stdout("You entered a non-valid time.\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -110,5 +186,17 @@ fn cli_usage() {
         .code(1)
         .stdout("Appointment time invalid. Minutes should be between 0 and 59\n");
 
-    helper_remove_data_file();
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--current-time", "23:60"])
+        .assert()
+        .failure()
+        .code(2);
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--current-time", "as:"])
+        .assert()
+        .failure()
+        .code(2);
 }

@@ -5,8 +5,15 @@ use crate::appointment::AppointmentTime;
 use super::{helper, Appointment, Config};
 
 /// Displays the list of appointments in the standard output
-pub fn display_list(config: Config) {
+pub fn display_list(ref_time: Option<AppointmentTime>, config: Config) {
     let mut appointments = get_appointments_from_file(&config.appointments_path);
+    if ref_time.is_some() {
+        let ref_time_value = ref_time.unwrap();
+        appointments = appointments
+            .into_iter()
+            .filter(|a| a.time > ref_time_value)
+            .collect();
+    }
     if appointments.is_empty() {
         println!("There are no appointments added for today.")
     }
