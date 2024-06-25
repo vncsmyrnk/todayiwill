@@ -31,3 +31,12 @@ jobs:
 
       - name: Build Check
         run: cargo build
+
+      - name: Test coverage report
+        id: coverage  
+        uses: actions-rs/grcov@v0.1
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
