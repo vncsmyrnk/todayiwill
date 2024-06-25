@@ -10,6 +10,7 @@ use super::{list, Appointment, Config};
 pub fn add_appointment(appointment: Appointment, config: Config) {
     let mut appointments = list::get_appointments_from_file(&config.appointments_path);
     appointments.push(appointment);
+    appointments.sort();
     match write_appointments_to_file(appointments, &config.appointments_path) {
         Ok(..) => println!("Appointment added successfully."),
         Err(error) => println!("An error occurred. {}", error),

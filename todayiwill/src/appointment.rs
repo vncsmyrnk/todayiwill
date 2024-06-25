@@ -22,7 +22,7 @@ impl Config {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AppointmentTime {
     pub hour: i32,
     pub minutes: i32,
@@ -46,7 +46,7 @@ impl fmt::Display for AppointmentTime {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Appointment {
     pub description: String,
     pub time: AppointmentTime,

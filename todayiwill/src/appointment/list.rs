@@ -6,10 +6,11 @@ use super::{helper, Appointment, Config};
 
 /// Displays the list of appointments in the standard output
 pub fn display_list(config: Config) {
-    let appointments = get_appointments_from_file(&config.appointments_path);
+    let mut appointments = get_appointments_from_file(&config.appointments_path);
     if appointments.is_empty() {
         println!("There are no appointments added for today.")
     }
+    appointments.sort();
     for appointment in &appointments {
         println!("{}", appointment)
     }

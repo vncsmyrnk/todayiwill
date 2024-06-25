@@ -33,14 +33,14 @@ fn cli_usage() {
         .success()
         .stdout("There are no appointments added for today.\n");
 
-    helper_write_to_data_file(b"14:45 Listen to music\n08:12 Call mom\n");
+    helper_write_to_data_file(b"08:12 Call mom\n14:45 Listen to music\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args(["list"])
         .assert()
         .success()
-        .stdout("14:45 Listen to music\n08:12 Call mom\n");
+        .stdout("08:12 Call mom\n14:45 Listen to music\n");
 
     helper_remove_data_file();
 
