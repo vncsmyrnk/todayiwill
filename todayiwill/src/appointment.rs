@@ -48,8 +48,8 @@ impl fmt::Display for AppointmentTime {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Appointment {
-    pub description: String,
     pub time: AppointmentTime,
+    pub description: String,
 }
 
 impl Appointment {
