@@ -1,14 +1,3 @@
-// Commands that should be available:
-// List
-// Add
-// List gone
-// List to be done
-// List to be done or done in x min
-
-// Other:
-// Save in files
-// notifications
-
 use appointment::{add, helper, Appointment, AppointmentTime, Config};
 use clap::{Parser, Subcommand};
 extern crate dirs;
