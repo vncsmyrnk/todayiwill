@@ -1,3 +1,5 @@
+use std::process;
+
 use appointment::{add, clear, helper, Appointment, AppointmentTime, Config};
 use clap::{Parser, Subcommand};
 extern crate dirs;
@@ -44,7 +46,7 @@ fn main() {
                 Some((hour, minutes)) => (hour, minutes),
                 None => {
                     println!("You entered a non-valid time.");
-                    return;
+                    process::exit(1)
                 }
             };
 
@@ -52,13 +54,10 @@ fn main() {
                 Ok(at) => at,
                 Err(error) => {
                     println!("Appointment time invalid. {}", error);
-                    return;
+                    process::exit(1)
                 }
             };
-            add::add_appointment(
-                Appointment::new(description, appointment_time),
-                config,
-            )
+            add::add_appointment(Appointment::new(description, appointment_time), config)
         }
         Commands::List => list::display_list(config),
         Commands::Clear => clear::clear_appointments(config),

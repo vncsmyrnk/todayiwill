@@ -71,7 +71,13 @@ mod tests {
     #[test]
     fn wellformed_appointment_time() {
         let result = AppointmentTime::new(20, 34);
-        assert_eq!(result.unwrap(), AppointmentTime { hour: 20, minutes: 34 });
+        assert_eq!(
+            result.unwrap(),
+            AppointmentTime {
+                hour: 20,
+                minutes: 34
+            }
+        );
     }
 
     #[test]

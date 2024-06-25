@@ -62,7 +62,8 @@ fn cli_usage() {
         .unwrap()
         .args(["add", "--description", "A certain event", "--time", "9:y3"])
         .assert()
-        .success()
+        .failure()
+        .code(1)
         .stdout("You entered a non-valid time.\n");
 
     Command::cargo_bin("todayiwill")
@@ -97,14 +98,16 @@ fn cli_usage() {
         .unwrap()
         .args(["add", "--description", "An urgent event", "--time", "24:10"])
         .assert()
-        .success()
+        .failure()
+        .code(1)
         .stdout("Appointment time invalid. Hour should be between 0 and 23\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args(["add", "--description", "An urgent event", "--time", "15:60"])
         .assert()
-        .success()
+        .failure()
+        .code(1)
         .stdout("Appointment time invalid. Minutes should be between 0 and 59\n");
 
     helper_remove_data_file();

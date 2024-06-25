@@ -39,10 +39,7 @@ fn parse_file_line(line: &str) -> Option<Appointment> {
         Ok(at) => at,
         Err(..) => return None,
     };
-    Some(Appointment::new(
-        description,
-        appointment_time
-    ))
+    Some(Appointment::new(description, appointment_time))
 }
 
 #[cfg(test)]
@@ -89,8 +86,14 @@ mod tests {
         assert_eq!(
             result,
             vec![
-                Appointment::new("Go to night shift".to_string(), AppointmentTime::new(22, 0).unwrap()),
-                Appointment::new("Visit grandma".to_string(), AppointmentTime::new(12, 45).unwrap()),
+                Appointment::new(
+                    "Go to night shift".to_string(),
+                    AppointmentTime::new(22, 0).unwrap()
+                ),
+                Appointment::new(
+                    "Visit grandma".to_string(),
+                    AppointmentTime::new(12, 45).unwrap()
+                ),
             ]
         );
         fs::remove_file(test_file_path).expect("Failed to delete test file");
