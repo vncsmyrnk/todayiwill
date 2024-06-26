@@ -62,15 +62,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload executables to release
+      - name: Upload Linux executable to release
         uses: svenstaro/upload-release-action@v2
         with:
           release_name: ${{ github.ref_name }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./artifacts/{todayiwill,install*}
+          file: ./artifacts/todayiwill
           file_glob: true
           draft: true
           body: |
             # Changelog
 
             ${{ steps.github_release.outputs.changelog }}
+
+      - name: Upload installer to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          release_name: ${{ github.ref_name }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./artifacts/install-linux-debian.sh
+          file_glob: true
+          draft: true
