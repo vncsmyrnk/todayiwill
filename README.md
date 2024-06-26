@@ -15,7 +15,7 @@ A CLI reminder app that offers a simple yet powerful solution to enhance product
 ### Ubuntu/debian
 
 ```bash
-bash <(curl -s https://github.com/vncsmyrnk/todayiwill/releases/latest/download/install-linux-debian.sh)
+bash <(wget -O- https://github.com/vncsmyrnk/todayiwill/releases/latest/download/install-linux-debian.sh 2> /dev/null)
 ```
 
 ## Examples
