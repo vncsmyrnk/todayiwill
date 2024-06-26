@@ -1,10 +1,13 @@
-use appointment::{add, clear, helper, Appointment, AppointmentTime, Config};
+use std::process;
+
 use clap::{Parser, Subcommand};
+
+extern crate chrono;
 extern crate dirs;
 
 mod appointment;
 
-use crate::appointment::list;
+use appointment::{add, clear, helper, list, Appointment, AppointmentTime, Config};
 
 /// A CLI for remembering what you need to do today
 #[derive(Debug, Parser)]
@@ -30,7 +33,19 @@ enum Commands {
     /// Clear all the appointments added until now
     Clear,
     /// List the appointments to come
-    List,
+    List {
+        /// Current time, defaults to system time
+        #[arg(short, long, value_parser=AppointmentTime::from, default_value_t=AppointmentTime::now())]
+        current_time: AppointmentTime,
+
+        /// Show appointments which will expire in X seconds
+        #[arg(short, long, default_value_t=-1)]
+        expire_in: i32,
+
+        /// If informed, all appointments are retrieved
+        #[arg(short, long, default_value_t = false)]
+        all: bool,
+    },
 }
 
 fn main() {
@@ -44,15 +59,34 @@ fn main() {
                 Some((hour, minutes)) => (hour, minutes),
                 None => {
                     println!("You entered a non-valid time.");
-                    return;
+                    process::exit(1)
                 }
             };
-            add::add_appointment(
-                Appointment::new(description, AppointmentTime::new(hour, minutes)),
-                config,
-            )
+
+            let appointment_time = match AppointmentTime::new(hour, minutes) {
+                Ok(at) => at,
+                Err(error) => {
+                    println!("Appointment time invalid. {}", error);
+                    process::exit(1)
+                }
+            };
+            add::add_appointment(Appointment::new(description, appointment_time), config)
         }
-        Commands::List => list::display_list(config),
+        Commands::List {
+            current_time,
+            expire_in,
+            all,
+        } => {
+            let ref_time = match all {
+                true => None,
+                _ => Some(current_time),
+            };
+            let ref_expiration = match expire_in {
+                -1 => None,
+                other => Some(other),
+            };
+            list::display_list(ref_time, ref_expiration, config)
+        }
         Commands::Clear => clear::clear_appointments(config),
     }
 }

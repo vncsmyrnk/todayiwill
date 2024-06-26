@@ -10,6 +10,7 @@ use super::{list, Appointment, Config};
 pub fn add_appointment(appointment: Appointment, config: Config) {
     let mut appointments = list::get_appointments_from_file(&config.appointments_path);
     appointments.push(appointment);
+    appointments.sort();
     match write_appointments_to_file(appointments, &config.appointments_path) {
         Ok(..) => println!("Appointment added successfully."),
         Err(error) => println!("An error occurred. {}", error),
@@ -45,8 +46,14 @@ mod tests {
         let path = base_path.join("test_file.txt");
         write_appointments_to_file(
             vec![
-                Appointment::new(String::from("Call aunt Anna"), AppointmentTime::new(15, 46)),
-                Appointment::new(String::from("Buy new cup"), AppointmentTime::new(16, 56)),
+                Appointment::new(
+                    String::from("Call aunt Anna"),
+                    AppointmentTime::new(15, 46).unwrap(),
+                ),
+                Appointment::new(
+                    String::from("Buy new cup"),
+                    AppointmentTime::new(16, 56).unwrap(),
+                ),
             ],
             &path,
         )

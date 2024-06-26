@@ -5,11 +5,29 @@ use crate::appointment::AppointmentTime;
 use super::{helper, Appointment, Config};
 
 /// Displays the list of appointments in the standard output
-pub fn display_list(config: Config) {
-    let appointments = get_appointments_from_file(&config.appointments_path);
+pub fn display_list(ref_time: Option<AppointmentTime>, expire_time: Option<i32>, config: Config) {
+    let mut appointments = get_appointments_from_file(&config.appointments_path);
     if appointments.is_empty() {
-        println!("There are no appointments added for today.")
+        println!("There are no appointments added for today.");
+        return;
     }
+    if ref_time.is_some() {
+        let lower_limit = ref_time.unwrap();
+        let upper_limit = match expire_time {
+            Some(value) => lower_limit.clone() + value,
+            None => AppointmentTime::max_value(),
+        };
+        appointments = appointments
+            .into_iter()
+            .filter(|a| a.time > lower_limit)
+            .filter(|a| a.time <= upper_limit)
+            .collect();
+    }
+    if appointments.is_empty() {
+        println!("No appointments found.");
+        return;
+    }
+    appointments.sort();
     for appointment in &appointments {
         println!("{}", appointment)
     }
@@ -32,12 +50,14 @@ pub fn get_appointments_from_file(path: &PathBuf) -> Vec<Appointment> {
 /// Parses a string representing a file line and return an appointment
 fn parse_file_line(line: &str) -> Option<Appointment> {
     let time: String = line.chars().take(5).collect();
+    // @todo: Change this section to use AppointmentTime::from
     let (hour, minutes): (i32, i32) = helper::parse_time(&time)?;
     let description = line.chars().skip(6).collect();
-    Some(Appointment::new(
-        description,
-        AppointmentTime::new(hour, minutes),
-    ))
+    let appointment_time = match AppointmentTime::new(hour, minutes) {
+        Ok(at) => at,
+        Err(..) => return None,
+    };
+    Some(Appointment::new(description, appointment_time))
 }
 
 #[cfg(test)]
@@ -65,7 +85,7 @@ mod tests {
     }
 
     #[test]
-    fn pase_malformed_line_time_fail() {
+    fn parse_malformed_line_time_fail() {
         let result = parse_file_line("10:0 This is an incorrect example");
         assert!(result.is_none());
     }
@@ -84,8 +104,14 @@ mod tests {
         assert_eq!(
             result,
             vec![
-                Appointment::new("Go to night shift".to_string(), AppointmentTime::new(22, 0)),
-                Appointment::new("Visit grandma".to_string(), AppointmentTime::new(12, 45)),
+                Appointment::new(
+                    "Go to night shift".to_string(),
+                    AppointmentTime::new(22, 0).unwrap()
+                ),
+                Appointment::new(
+                    "Visit grandma".to_string(),
+                    AppointmentTime::new(12, 45).unwrap()
+                ),
             ]
         );
         fs::remove_file(test_file_path).expect("Failed to delete test file");
