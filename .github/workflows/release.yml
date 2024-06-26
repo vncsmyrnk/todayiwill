@@ -40,7 +40,7 @@ jobs:
           name: artifacts
           path: |
             ./todayiwill/target/release
-            ./install*
+            ./install-*
 
   release:
     needs: build
@@ -69,7 +69,7 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            artifacts/todayiwill
+            artifacts/todayiwill/target/release/todayiwill
             artifacts/install-*
           body: |
             # Changelog
