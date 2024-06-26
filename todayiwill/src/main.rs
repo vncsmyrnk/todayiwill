@@ -72,7 +72,11 @@ fn main() {
             };
             add::add_appointment(Appointment::new(description, appointment_time), config)
         }
-        Commands::List { current_time, expire_in, all } => {
+        Commands::List {
+            current_time,
+            expire_in,
+            all,
+        } => {
             let ref_time = match all {
                 true => None,
                 _ => Some(current_time),

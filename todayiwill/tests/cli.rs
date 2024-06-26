@@ -167,14 +167,26 @@ fn list_expire_in_x_mins() {
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["add", "--description", "Schedule doctor appointment", "--time", "10:23"])
+        .args([
+            "add",
+            "--description",
+            "Schedule doctor appointment",
+            "--time",
+            "10:23",
+        ])
         .assert()
         .success()
         .stdout("Appointment added successfully.\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["add", "--description", "Reply to an important e-mail", "--time", "09:45"])
+        .args([
+            "add",
+            "--description",
+            "Reply to an important e-mail",
+            "--time",
+            "09:45",
+        ])
         .assert()
         .success()
         .stdout("Appointment added successfully.\n");

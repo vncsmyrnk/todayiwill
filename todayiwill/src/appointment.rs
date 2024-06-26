@@ -59,7 +59,10 @@ impl AppointmentTime {
     }
 
     pub fn max_value() -> Self {
-        Self { hour: 23, minutes: 59 }
+        Self {
+            hour: 23,
+            minutes: 59,
+        }
     }
 }
 
@@ -72,7 +75,10 @@ impl Add<i32> for AppointmentTime {
         if hours_updated > 23 {
             return AppointmentTime::max_value();
         }
-        Self { hour: hours_updated, minutes: minutes_updated % 60 }
+        Self {
+            hour: hours_updated,
+            minutes: minutes_updated % 60,
+        }
     }
 }
 
