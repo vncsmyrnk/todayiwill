@@ -1,32 +1,12 @@
-use std::{fs, fs::File, io::Write};
-
 use assert_cmd::Command;
 use serial_test::serial;
 
-fn helper_remove_data_file() {
-    let appointments_path = dirs::data_dir()
-        .unwrap()
-        .join(String::from("todayiwill"))
-        .join(String::from("appointments.txt"));
-    match fs::remove_file(appointments_path) {
-        _ => return,
-    }
-}
-
-fn helper_write_to_data_file(content: &[u8]) {
-    let base_dir = dirs::data_dir().unwrap().join(String::from("todayiwill"));
-    fs::create_dir_all(base_dir.to_str().unwrap()).expect("Failed to create data dir");
-    let appointments_path = base_dir.join(String::from("appointments.txt"));
-    let mut file =
-        File::create(appointments_path.to_str().unwrap()).expect("Failed to create test file");
-    file.write_all(content)
-        .expect("Failed to write to test file");
-}
+mod common;
 
 #[test]
 #[serial]
 fn empty_list() {
-    helper_remove_data_file();
+    common::setup();
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -39,8 +19,8 @@ fn empty_list() {
 #[test]
 #[serial]
 fn list_appointments() {
-    helper_remove_data_file();
-    helper_write_to_data_file(b"08:12 Call mom\n14:45 Listen to music\n");
+    common::setup();
+    common::helper_write_to_data_file(b"08:12 Call mom\n14:45 Listen to music\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -49,17 +29,25 @@ fn list_appointments() {
         .success()
         .stdout("08:12 Call mom\n14:45 Listen to music\n");
 
-    helper_remove_data_file();
+    common::helper_remove_data_file();
 }
 
 #[test]
 #[serial]
 fn add_appointment() {
-    helper_remove_data_file();
+    common::setup();
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["add", "--description", "A certain event", "--time", "16:50"])
+        .args([
+            "add",
+            "--description",
+            "A certain event",
+            "--time",
+            "16:50",
+            "--current-time",
+            "10:00",
+        ])
         .assert()
         .success()
         .stdout("Appointment added successfully.\n");
@@ -71,17 +59,25 @@ fn add_appointment() {
         .success()
         .stdout("16:50 A certain event\n");
 
-    helper_remove_data_file();
+    common::helper_remove_data_file();
 }
 
 #[test]
 #[serial]
 fn clear_appointments() {
-    helper_remove_data_file();
+    common::setup();
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["add", "--description", "An urgent event", "--time", "20:10"])
+        .args([
+            "add",
+            "--description",
+            "An urgent event",
+            "--time",
+            "20:10",
+            "--current-time",
+            "18:32",
+        ])
         .assert()
         .success()
         .stdout("Appointment added successfully.\n");
@@ -107,24 +103,40 @@ fn clear_appointments() {
         .success()
         .stdout("There are no appointments added for today.\n");
 
-    helper_remove_data_file();
+    common::helper_remove_data_file();
 }
 
 #[test]
 #[serial]
 fn list_current_time() {
-    helper_remove_data_file();
+    common::setup();
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["add", "--description", "Clean bedroom", "--time", "19:00"])
+        .args([
+            "add",
+            "--description",
+            "Clean bedroom",
+            "--time",
+            "19:00",
+            "--current-time",
+            "08:56",
+        ])
         .assert()
         .success()
         .stdout("Appointment added successfully.\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["add", "--description", "Brush teeth", "--time", "22:30"])
+        .args([
+            "add",
+            "--description",
+            "Brush teeth",
+            "--time",
+            "22:30",
+            "--current-time",
+            "19:10",
+        ])
         .assert()
         .success()
         .stdout("Appointment added successfully.\n");
@@ -157,13 +169,13 @@ fn list_current_time() {
         .success()
         .stdout("19:00 Clean bedroom\n22:30 Brush teeth\n");
 
-    helper_remove_data_file();
+    common::helper_remove_data_file();
 }
 
 #[test]
 #[serial]
 fn list_expire_in_x_mins() {
-    helper_remove_data_file();
+    common::setup();
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -173,6 +185,8 @@ fn list_expire_in_x_mins() {
             "Schedule doctor appointment",
             "--time",
             "10:23",
+            "--current-time",
+            "09:00",
         ])
         .assert()
         .success()
@@ -186,6 +200,8 @@ fn list_expire_in_x_mins() {
             "Reply to an important e-mail",
             "--time",
             "09:45",
+            "--current-time",
+            "09:00",
         ])
         .assert()
         .success()
@@ -226,11 +242,13 @@ fn list_expire_in_x_mins() {
         .success()
         .stdout("No appointments found.\n");
 
-    helper_remove_data_file();
+    common::helper_remove_data_file();
 }
 
 #[test]
-fn invalid_entries() {
+fn add_invalid_entries_for_time() {
+    common::setup();
+
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args(["add", "--description", "A certain event", "--time", "9:y3"])
@@ -254,6 +272,78 @@ fn invalid_entries() {
         .failure()
         .code(1)
         .stdout("Appointment time invalid. Minutes should be between 0 and 59\n");
+}
+
+#[test]
+fn add_invalid_entries_for_current_time() {
+    common::setup();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Drive Martha to school",
+            "--time",
+            "15:30",
+            "--current-time",
+            "19:01",
+        ])
+        .assert()
+        .failure()
+        .code(1)
+        .stdout("Given time already passed.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Buy groceries",
+            "--time",
+            "11:40",
+            "--current-time",
+            "11:40",
+        ])
+        .assert()
+        .failure()
+        .code(1)
+        .stdout("Given time already passed.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "A reminder",
+            "--time",
+            "14:32",
+            "--current-time",
+            "23:60",
+        ])
+        .assert()
+        .failure()
+        .code(2);
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Another reminder",
+            "--time",
+            "15:43",
+            "--current-time",
+            "10:00pm",
+        ])
+        .assert()
+        .failure()
+        .code(2);
+}
+
+#[test]
+fn list_invalid_entries_current_time() {
+    common::setup();
 
     Command::cargo_bin("todayiwill")
         .unwrap()
