@@ -38,7 +38,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: artifacts
-          path: ./todayiwill/target/release
+          path: |
+            ./todayiwill/target/release
+            ./install*
 
   release:
     needs: build
@@ -60,12 +62,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload linux executable to release
+      - name: Upload executables to release
         uses: svenstaro/upload-release-action@v2
         with:
           release_name: ${{ github.ref_name }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./artifacts/todayiwill
+          file: ./artifacts/{todayiwill,install*}
           file_glob: true
           draft: true
           body: |
