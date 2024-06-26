@@ -12,10 +12,10 @@ A CLI reminder app that offers a simple yet powerful solution to enhance product
 
 ## Installation
 
+### Ubuntu/debian
+
 ```bash
-wget https://github.com/vncsmyrnk/todayiwill/releases/latest/download/todayiwill
-chmod u+x todayiwill
-todayiwill --version
+bash <(curl -s https://github.com/vncsmyrnk/todayiwill/releases/latest/download/install-linux-debian.sh)
 ```
 
 ## Examples
