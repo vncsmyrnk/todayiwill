@@ -246,6 +246,7 @@ fn list_expire_in_x_mins() {
 }
 
 #[test]
+#[serial]
 fn add_invalid_entries_for_time() {
     common::setup();
 
@@ -275,6 +276,7 @@ fn add_invalid_entries_for_time() {
 }
 
 #[test]
+#[serial]
 fn add_invalid_entries_for_current_time() {
     common::setup();
 
@@ -342,6 +344,7 @@ fn add_invalid_entries_for_current_time() {
 }
 
 #[test]
+#[serial]
 fn list_invalid_entries_current_time() {
     common::setup();
 
