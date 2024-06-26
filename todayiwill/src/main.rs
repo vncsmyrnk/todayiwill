@@ -77,7 +77,11 @@ fn main() {
                 true => None,
                 _ => Some(current_time),
             };
-            list::display_list(ref_time, config)
+            let ref_expiration = match expire_in {
+                -1 => None,
+                other => Some(other),
+            };
+            list::display_list(ref_time, ref_expiration, config)
         }
         Commands::Clear => clear::clear_appointments(config),
     }

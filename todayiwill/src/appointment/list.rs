@@ -5,21 +5,27 @@ use crate::appointment::AppointmentTime;
 use super::{helper, Appointment, Config};
 
 /// Displays the list of appointments in the standard output
-pub fn display_list(ref_time: Option<AppointmentTime> /*, expire_time: Option<i32>*/, config: Config) {
+pub fn display_list(ref_time: Option<AppointmentTime>, expire_time: Option<i32>, config: Config) {
     let mut appointments = get_appointments_from_file(&config.appointments_path);
+    if appointments.is_empty() {
+        println!("There are no appointments added for today.");
+        return;
+    }
     if ref_time.is_some() {
         let lower_limit = ref_time.unwrap();
-        // let upper_limit = match expire_time {
-        //     Some(value) => lower_limit + value,
-        //     None => AppointmentTime::max_value(),
-        // };
+        let upper_limit = match expire_time {
+            Some(value) => lower_limit.clone() + value,
+            None => AppointmentTime::max_value(),
+        };
         appointments = appointments
             .into_iter()
             .filter(|a| a.time > lower_limit)
+            .filter(|a| a.time <= upper_limit)
             .collect();
     }
     if appointments.is_empty() {
-        println!("There are no appointments added for today.")
+        println!("No appointments found.");
+        return;
     }
     appointments.sort();
     for appointment in &appointments {

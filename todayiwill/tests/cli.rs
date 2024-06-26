@@ -148,7 +148,7 @@ fn list_current_time() {
         .args(["list", "--current-time", "22:30"])
         .assert()
         .success()
-        .stdout("There are no appointments added for today.\n");
+        .stdout("No appointments found.\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -161,7 +161,6 @@ fn list_current_time() {
 }
 
 #[test]
-#[ignore]
 #[serial]
 fn list_expire_in_x_mins() {
     helper_remove_data_file();
@@ -199,7 +198,23 @@ fn list_expire_in_x_mins() {
         .args(["list", "--current-time", "09:30", "--expire-in", "60"])
         .assert()
         .success()
-        .stdout("09:45 Reply to an important e-mail\n10:30 Schedule doctor appointment\n");
+        .stdout("09:45 Reply to an important e-mail\n10:23 Schedule doctor appointment\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--current-time", "09:30", "--expire-in", "15"])
+        .assert()
+        .success()
+        .stdout("09:45 Reply to an important e-mail\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--current-time", "09:30", "--expire-in", "14"])
+        .assert()
+        .success()
+        .stdout("No appointments found.\n");
+
+    helper_remove_data_file();
 }
 
 #[test]

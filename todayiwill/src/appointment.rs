@@ -70,7 +70,7 @@ impl Add<i32> for AppointmentTime {
         let minutes_updated = self.minutes + rhs;
         let hours_updated = self.hour + (minutes_updated / 60);
         if hours_updated > 23 {
-            return Self { hour: 0, minutes: 0 };
+            return AppointmentTime::max_value();
         }
         Self { hour: hours_updated, minutes: minutes_updated % 60 }
     }
@@ -177,6 +177,12 @@ mod tests {
     #[test]
     fn add_i32_to_appointment_time_upper_limit() {
         let result = AppointmentTime::new(23, 55).unwrap() + 20;
-        assert_eq!(result, AppointmentTime::new(0, 0).unwrap());
+        assert_eq!(result, AppointmentTime::max_value());
+    }
+
+    #[test]
+    fn add_i32_to_appointment_time_upper_limit_edge_case() {
+        let result = AppointmentTime::new(23, 55).unwrap() + 4;
+        assert_eq!(result, AppointmentTime::max_value());
     }
 }
