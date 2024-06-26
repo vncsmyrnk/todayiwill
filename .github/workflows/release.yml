@@ -62,24 +62,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Linux executable to release
-        uses: svenstaro/upload-release-action@v2
+      - name: Create release
+        uses: softprops/action-gh-release@v2
         with:
-          release_name: ${{ github.ref_name }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./artifacts/todayiwill
-          file_glob: true
+          name: ${{ github.ref_name }}
           draft: true
+          prerelease: false
+          files: |
+            artifacts/todayiwill
+            artifacts/install-*
           body: |
             # Changelog
 
             ${{ steps.github_release.outputs.changelog }}
-
-      - name: Upload installer to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          release_name: ${{ github.ref_name }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./artifacts/install-linux-debian.sh
-          file_glob: true
-          draft: true
