@@ -29,6 +29,10 @@ enum Commands {
         /// Appointment time
         #[arg(short, long)]
         time: String,
+
+        /// Current time, defaults to system time
+        #[arg(short, long, value_parser=AppointmentTime::from, default_value_t=AppointmentTime::now())]
+        current_time: AppointmentTime,
     },
     /// Clear all the appointments added until now
     Clear,
@@ -53,7 +57,11 @@ fn main() {
     let config = Config::default();
 
     match args.command {
-        Commands::Add { description, time } => {
+        Commands::Add {
+            description,
+            time,
+            current_time,
+        } => {
             let result = helper::parse_time(&time);
             let (hour, minutes) = match result {
                 Some((hour, minutes)) => (hour, minutes),
@@ -70,7 +78,19 @@ fn main() {
                     process::exit(1)
                 }
             };
-            add::add_appointment(Appointment::new(description, appointment_time), config)
+
+            if appointment_time <= current_time {
+                println!("Given time already passed.");
+                process::exit(1)
+            }
+
+            match add::add_appointment(Appointment::new(description, appointment_time), config) {
+                Ok(..) => (),
+                Err(error) => {
+                    println!("An error occurred. {}", error);
+                    process::exit(1)
+                }
+            }
         }
         Commands::List {
             current_time,
