@@ -32,10 +32,10 @@ pub struct AppointmentTime {
 
 impl AppointmentTime {
     pub fn new(hour: i32, minutes: i32) -> Result<Self, String> {
-        if hour < 0 || hour > 23 {
+        if !(0..24).contains(&hour) {
             return Err(String::from("Hour should be between 0 and 23"));
         }
-        if minutes < 0 || minutes > 59 {
+        if !(0..60).contains(&minutes) {
             return Err(String::from("Minutes should be between 0 and 59"));
         }
         Ok(Self { hour, minutes })
@@ -131,6 +131,18 @@ mod tests {
     }
 
     #[test]
+    fn malformed_appointment_time_edge_case_minutes() {
+        let result = AppointmentTime::new(26, 60);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn malformed_appointment_time_edge_case_hour() {
+        let result = AppointmentTime::new(24, 5);
+        assert!(result.is_err());
+    }
+
+    #[test]
     fn wellformed_appointment_time_now() {
         let time = Local::now();
         let appointment_time_now = AppointmentTime::now();
@@ -159,6 +171,18 @@ mod tests {
     #[test]
     fn invalid_appointment_time_from_string() {
         let result = AppointmentTime::from("12:76");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn invalid_appointment_time_from_string_edge_case_minutes() {
+        let result = AppointmentTime::from("01:60");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn invalid_appointment_time_from_string_edge_case_hour() {
+        let result = AppointmentTime::from("24:43");
         assert!(result.is_err());
     }
 
