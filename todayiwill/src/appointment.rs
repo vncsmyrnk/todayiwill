@@ -1,5 +1,5 @@
 use core::fmt;
-use std::path::PathBuf;
+use std::{ops::Add, path::PathBuf};
 
 use chrono::Local;
 
@@ -56,6 +56,23 @@ impl AppointmentTime {
         };
         let appointment_time = Self::new(hour, minutes)?;
         Ok(appointment_time)
+    }
+
+    pub fn max_value() -> Self {
+        Self { hour: 23, minutes: 59 }
+    }
+}
+
+impl Add<i32> for AppointmentTime {
+    type Output = AppointmentTime;
+
+    fn add(self, rhs: i32) -> Self::Output {
+        let minutes_updated = self.minutes + rhs;
+        let hours_updated = self.hour + (minutes_updated / 60);
+        if hours_updated > 23 {
+            return Self { hour: 0, minutes: 0 };
+        }
+        Self { hour: hours_updated, minutes: minutes_updated % 60 }
     }
 }
 
@@ -137,5 +154,29 @@ mod tests {
     fn invalid_appointment_time_from_string() {
         let result = AppointmentTime::from("12:76");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn max_value() {
+        let result = AppointmentTime::max_value();
+        assert_eq!(result, AppointmentTime::new(23, 59).unwrap());
+    }
+
+    #[test]
+    fn add_i32_to_appointment_time() {
+        let result = AppointmentTime::new(10, 30).unwrap() + 10;
+        assert_eq!(result, AppointmentTime::new(10, 40).unwrap());
+    }
+
+    #[test]
+    fn add_i32_to_appointment_time_edge_case() {
+        let result = AppointmentTime::new(3, 50).unwrap() + 100;
+        assert_eq!(result, AppointmentTime::new(5, 30).unwrap());
+    }
+
+    #[test]
+    fn add_i32_to_appointment_time_upper_limit() {
+        let result = AppointmentTime::new(23, 55).unwrap() + 20;
+        assert_eq!(result, AppointmentTime::new(0, 0).unwrap());
     }
 }

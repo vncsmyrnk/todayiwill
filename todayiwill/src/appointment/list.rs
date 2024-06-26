@@ -5,13 +5,17 @@ use crate::appointment::AppointmentTime;
 use super::{helper, Appointment, Config};
 
 /// Displays the list of appointments in the standard output
-pub fn display_list(ref_time: Option<AppointmentTime>, config: Config) {
+pub fn display_list(ref_time: Option<AppointmentTime> /*, expire_time: Option<i32>*/, config: Config) {
     let mut appointments = get_appointments_from_file(&config.appointments_path);
     if ref_time.is_some() {
-        let ref_time_value = ref_time.unwrap();
+        let lower_limit = ref_time.unwrap();
+        // let upper_limit = match expire_time {
+        //     Some(value) => lower_limit + value,
+        //     None => AppointmentTime::max_value(),
+        // };
         appointments = appointments
             .into_iter()
-            .filter(|a| a.time > ref_time_value)
+            .filter(|a| a.time > lower_limit)
             .collect();
     }
     if appointments.is_empty() {
@@ -40,6 +44,7 @@ pub fn get_appointments_from_file(path: &PathBuf) -> Vec<Appointment> {
 /// Parses a string representing a file line and return an appointment
 fn parse_file_line(line: &str) -> Option<Appointment> {
     let time: String = line.chars().take(5).collect();
+    // @todo: Change this section to use AppointmentTime::from
     let (hour, minutes): (i32, i32) = helper::parse_time(&time)?;
     let description = line.chars().skip(6).collect();
     let appointment_time = match AppointmentTime::new(hour, minutes) {

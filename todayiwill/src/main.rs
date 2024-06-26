@@ -38,6 +38,10 @@ enum Commands {
         #[arg(short, long, value_parser=AppointmentTime::from, default_value_t=AppointmentTime::now())]
         current_time: AppointmentTime,
 
+        /// Show appointments which will expire in X seconds
+        #[arg(short, long, default_value_t=-1)]
+        expire_in: i32,
+
         /// If informed, all appointments are retrieved
         #[arg(short, long, default_value_t = false)]
         all: bool,
@@ -68,7 +72,7 @@ fn main() {
             };
             add::add_appointment(Appointment::new(description, appointment_time), config)
         }
-        Commands::List { current_time, all } => {
+        Commands::List { current_time, expire_in, all } => {
             let ref_time = match all {
                 true => None,
                 _ => Some(current_time),

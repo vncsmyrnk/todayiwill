@@ -161,6 +161,48 @@ fn list_current_time() {
 }
 
 #[test]
+#[ignore]
+#[serial]
+fn list_expire_in_x_mins() {
+    helper_remove_data_file();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--description", "Schedule doctor appointment", "--time", "10:23"])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--description", "Reply to an important e-mail", "--time", "09:45"])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--current-time", "09:30", "--expire-in", "20"])
+        .assert()
+        .success()
+        .stdout("09:45 Reply to an important e-mail\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--current-time", "09:30", "--expire-in", "10"])
+        .assert()
+        .success()
+        .stdout("No appointments found.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--current-time", "09:30", "--expire-in", "60"])
+        .assert()
+        .success()
+        .stdout("09:45 Reply to an important e-mail\n10:30 Schedule doctor appointment\n");
+}
+
+#[test]
 fn invalid_entries() {
     Command::cargo_bin("todayiwill")
         .unwrap()
