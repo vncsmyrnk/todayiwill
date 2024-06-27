@@ -368,6 +368,7 @@ fn list_invalid_entries_current_time() {
 #[serial]
 fn appointments_stored_using_determined_file_name() {
     common::setup();
+
     let current_date = Local::now().format("%d%m%Y").to_string();
     let appointments_file = dirs::data_dir()
         .unwrap()
@@ -391,4 +392,44 @@ fn appointments_stored_using_determined_file_name() {
         .stdout("Appointment added successfully.\n");
 
     assert!(appointments_file.exists());
+}
+
+#[test]
+#[serial]
+#[ignore = "feature history not implemented yet"]
+fn appointment_history() {
+    common::setup();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Work on my art portfolio",
+            "--time",
+            "18:40",
+            "--current-time",
+            "09:00",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "history",
+            "--date",
+            Local::now().format("%d/%m/%Y").to_string().as_str(),
+        ])
+        .assert()
+        .success()
+        .stdout("18:40 Work on my portfolio\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["history", "--date", "01/01/2024"])
+        .assert()
+        .success()
+        .stdout("There are no appointments added this day.\n");
 }
