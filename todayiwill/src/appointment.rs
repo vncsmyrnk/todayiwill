@@ -16,8 +16,10 @@ pub struct Config {
 
 impl Config {
     pub fn default() -> Self {
+        // let current_timestamp = Local::now().timestamp();
         let base_dir = dirs::data_dir().unwrap().join("todayiwill");
-        let appointments_path = base_dir.join("appointments.txt");
+        // let appointments_path = base_dir.join(format!("appointments_{current_timestamp}.txt"));
+        let appointments_path = base_dir.join(format!("appointments.txt"));
         Self {
             appointments_path: Box::new(appointments_path),
         }
