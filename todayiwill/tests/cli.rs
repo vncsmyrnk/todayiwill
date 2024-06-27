@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use chrono::Local;
 use serial_test::serial;
 
 mod common;
@@ -361,4 +362,31 @@ fn list_invalid_entries_current_time() {
         .assert()
         .failure()
         .code(2);
+}
+
+#[test]
+#[serial]
+#[ignore]
+fn appointments_stored_using_determined_file_name() {
+    common::setup();
+    let current_date = Local::now().format("%d%m%Y").to_string();
+    let appointments_file = dirs::data_dir().unwrap().join("todayiwill").join(format!("appointments_{current_date}.txt"));
+    assert!(!appointments_file.exists());
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Check sink problem",
+            "--time",
+            "09:56",
+            "--current-time",
+            "09:00",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    assert!(appointments_file.exists());
 }

@@ -32,6 +32,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn timestamp_check() {
         let current_timestamp = current_date_timestamp().unwrap();
         assert_eq!(current_timestamp, 1719457200);
