@@ -281,8 +281,6 @@ fn add_invalid_entries_for_time() {
 #[test]
 #[serial]
 fn add_invalid_entries_for_current_time() {
-    common::setup();
-
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args([
@@ -341,6 +339,31 @@ fn add_invalid_entries_for_current_time() {
             "--current-time",
             "10:00pm",
         ])
+        .assert()
+        .failure()
+        .code(2);
+}
+
+#[test]
+#[serial]
+fn add_invalid_entries_missing_parameters() {
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--time", "22:03"])
+        .assert()
+        .failure()
+        .code(2);
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--description", "Wash the kitchen floor"])
+        .assert()
+        .failure()
+        .code(2);
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add"])
         .assert()
         .failure()
         .code(2);
@@ -445,4 +468,22 @@ fn appointment_history() {
         .assert()
         .success()
         .stdout("13:12 An appointment added on 01/01/2024\n");
+}
+
+#[test]
+#[serial]
+fn history_invalid_entries() {
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["history"])
+        .assert()
+        .failure()
+        .code(2);
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["history", "--date", "01-2023-22"])
+        .assert()
+        .failure()
+        .code(2);
 }
