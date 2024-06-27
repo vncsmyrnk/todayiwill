@@ -46,13 +46,11 @@ fn appointments_file(date: NaiveDate) -> PathBuf {
     let current_date_code = date.format("%d%m%Y").to_string();
     dirs::data_dir()
         .unwrap()
-        .join(String::from("todayiwill"))
-        .join(String::from(format!(
-            "appointments_{current_date_code}.txt"
-        )))
+        .join("todayiwill")
+        .join(format!("appointments_{current_date_code}.txt"))
 }
 
 /// Returns the app data dir for testing
 fn app_data_dir() -> PathBuf {
-    dirs::data_dir().unwrap().join(String::from("todayiwill"))
+    dirs::data_dir().unwrap().join("todayiwill")
 }

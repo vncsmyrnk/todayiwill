@@ -399,7 +399,11 @@ fn appointments_stored_using_determined_file_name() {
         .unwrap()
         .join("todayiwill")
         .join(format!("appointments_{current_date}.txt"));
-    assert!(!appointments_file.exists());
+    assert!(
+        !appointments_file.exists(),
+        "File \"{}\" exists when it should not",
+        appointments_file.to_str().unwrap()
+    );
 
     Command::cargo_bin("todayiwill")
         .unwrap()
