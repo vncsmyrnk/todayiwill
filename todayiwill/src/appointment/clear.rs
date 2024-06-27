@@ -3,7 +3,7 @@ use std::{fs, io, path::PathBuf};
 use super::Config;
 
 pub fn clear_appointments(config: Config) {
-    match remove_file(&config.appointments_path) {
+    match remove_file(&config.appointment_file_path_current_day) {
         Ok(..) => println!("Appointments cleared successfully."),
         Err(error) => println!(
             "An error occurred when clearing the appointments. {}",

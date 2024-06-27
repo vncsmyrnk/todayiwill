@@ -1,7 +1,7 @@
 use core::fmt;
 use std::{ops::Add, path::PathBuf};
 
-use chrono::Local;
+use chrono::{Local, NaiveDate};
 
 extern crate dirs;
 
@@ -11,16 +11,23 @@ pub mod helper;
 pub mod list;
 
 pub struct Config {
-    pub appointments_path: Box<PathBuf>,
+    pub appointment_file_path_current_day: Box<PathBuf>,
+    pub appointment_file_path_builder: Box<dyn Fn(NaiveDate) -> PathBuf>,
 }
 
 impl Config {
     pub fn default() -> Self {
-        let current_date_code = helper::current_date_code();
-        let base_dir = dirs::data_dir().unwrap().join("todayiwill");
-        let appointments_path = base_dir.join(format!("appointments_{current_date_code}.txt"));
+        let appointment_path_builder = |date: NaiveDate| {
+            dirs::data_dir()
+                .unwrap()
+                .join("todayiwill")
+                .join(format!("appointments_{}.txt", helper::date_code(date)))
+        };
         Self {
-            appointments_path: Box::new(appointments_path),
+            appointment_file_path_current_day: Box::new(appointment_path_builder(
+                Local::now().date_naive(),
+            )),
+            appointment_file_path_builder: Box::new(appointment_path_builder),
         }
     }
 }
@@ -31,13 +38,13 @@ pub struct AppointmentTime {
     pub minutes: i32,
 }
 
-impl AppointmentTime {
-    pub fn new(hour: i32, minutes: i32) -> Result<Self, String> {
+impl<'a> AppointmentTime {
+    pub fn new(hour: i32, minutes: i32) -> Result<Self, &'a str> {
         if !(0..24).contains(&hour) {
-            return Err(String::from("Hour should be between 0 and 23"));
+            return Err("Hour should be between 0 and 23");
         }
         if !(0..60).contains(&minutes) {
-            return Err(String::from("Minutes should be between 0 and 59"));
+            return Err("Minutes should be between 0 and 59");
         }
         Ok(Self { hour, minutes })
     }
@@ -50,10 +57,10 @@ impl AppointmentTime {
         }
     }
 
-    pub fn from(time: &str) -> Result<Self, String> {
+    pub fn from(time: &str) -> Result<Self, &'a str> {
         let (hour, minutes) = match helper::parse_time(time) {
             Some((hour, minutes)) => (hour, minutes),
-            None => return Err(String::from("Invalid string for appointment time")),
+            None => return Err("Invalid string for appointment time"),
         };
         let appointment_time = Self::new(hour, minutes)?;
         Ok(appointment_time)
@@ -109,9 +116,9 @@ impl fmt::Display for Appointment {
 
 #[cfg(test)]
 mod tests {
-    use chrono::Local;
+    use chrono::{Local, NaiveDate};
 
-    use super::AppointmentTime;
+    use super::{AppointmentTime, Config};
 
     #[test]
     fn wellformed_appointment_time() {
@@ -215,5 +222,19 @@ mod tests {
     fn add_i32_to_appointment_time_upper_limit_edge_case() {
         let result = AppointmentTime::new(23, 55).unwrap() + 4;
         assert_eq!(result, AppointmentTime::max_value());
+    }
+
+    #[test]
+    fn config_default_should_return_a_builder_fn() {
+        let result = (Config::default().appointment_file_path_builder)(
+            NaiveDate::from_ymd_opt(2023, 10, 21).unwrap(),
+        );
+        assert_eq!(
+            result,
+            dirs::data_dir()
+                .unwrap()
+                .join("todayiwill")
+                .join("appointments_21102023.txt")
+        );
     }
 }

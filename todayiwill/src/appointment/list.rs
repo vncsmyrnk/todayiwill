@@ -1,12 +1,14 @@
 use std::{fs, path::PathBuf};
 
+use chrono::NaiveDate;
+
 use crate::appointment::AppointmentTime;
 
 use super::{Appointment, Config};
 
 /// Displays the list of appointments in the standard output
 pub fn display_list(ref_time: Option<AppointmentTime>, expire_time: Option<i32>, config: Config) {
-    let mut appointments = get_appointments_from_file(&config.appointments_path);
+    let mut appointments = get_appointments_from_file(&config.appointment_file_path_current_day);
     if appointments.is_empty() {
         println!("There are no appointments added for today.");
         return;
@@ -25,6 +27,20 @@ pub fn display_list(ref_time: Option<AppointmentTime>, expire_time: Option<i32>,
     }
     if appointments.is_empty() {
         println!("No appointments found.");
+        return;
+    }
+    appointments.sort();
+    for appointment in &appointments {
+        println!("{}", appointment)
+    }
+}
+
+/// Displays all appointments for specific dates
+pub fn display_all_from(date: NaiveDate, config: Config) {
+    let mut appointments =
+        get_appointments_from_file(&(config.appointment_file_path_builder)(date));
+    if appointments.is_empty() {
+        println!("There are no appointments added this day.");
         return;
     }
     appointments.sort();

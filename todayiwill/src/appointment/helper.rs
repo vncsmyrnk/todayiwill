@@ -1,4 +1,4 @@
-use chrono::{Local, NaiveDate};
+use chrono::{NaiveDate, ParseError};
 
 /// Parses string time (hours and minutes) and returns a tuple with both values
 /// `10:43` -> Option<(10, 43)>
@@ -15,18 +15,16 @@ pub fn date_code(date: NaiveDate) -> String {
     date.format("%d%m%Y").to_string()
 }
 
-/// Returns a date code for the current date
-pub fn current_date_code() -> String {
-    date_code(Local::now().date_naive())
+/// Converts a string to a naive date
+pub fn str_dmy_to_naive_date(date: &str) -> Result<NaiveDate, ParseError> {
+    NaiveDate::parse_from_str(date, "%d/%m/%Y")
 }
 
 #[cfg(test)]
 mod tests {
-    use chrono::{Local, NaiveDate};
+    use chrono::NaiveDate;
 
-    use crate::appointment::helper::current_date_code;
-
-    use super::{date_code, parse_time};
+    use super::{date_code, parse_time, str_dmy_to_naive_date};
 
     #[test]
     fn parse_wellformed_time() {
@@ -47,8 +45,23 @@ mod tests {
     }
 
     #[test]
-    fn current_date_code_check() {
-        let result = current_date_code();
-        assert_eq!(result, Local::now().format("%d%m%Y").to_string());
+    fn wellformed_date_naive_parse() {
+        let result = str_dmy_to_naive_date("24/06/2023");
+        assert_eq!(
+            result.unwrap(),
+            NaiveDate::from_ymd_opt(2023, 6, 24).unwrap()
+        );
+    }
+
+    #[test]
+    fn malformed_date_naive_parse() {
+        let result = str_dmy_to_naive_date("12/96202");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn malformed_date_naive_parse_edge_case() {
+        let result = str_dmy_to_naive_date("2020-01-23");
+        assert!(result.is_err());
     }
 }

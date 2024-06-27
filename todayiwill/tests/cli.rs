@@ -398,7 +398,6 @@ fn appointments_stored_using_determined_file_name() {
 
 #[test]
 #[serial]
-#[ignore = "feature history not implemented yet"]
 fn appointment_history() {
     common::setup();
 
@@ -426,7 +425,7 @@ fn appointment_history() {
         ])
         .assert()
         .success()
-        .stdout("18:40 Work on my portfolio\n");
+        .stdout("18:40 Work on my art portfolio\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -442,7 +441,7 @@ fn appointment_history() {
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["history", "--date", "01/01/2023"])
+        .args(["history", "--date", "01/01/2024"])
         .assert()
         .success()
         .stdout("13:12 An appointment added on 01/01/2024\n");
