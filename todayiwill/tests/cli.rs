@@ -366,11 +366,13 @@ fn list_invalid_entries_current_time() {
 
 #[test]
 #[serial]
-#[ignore]
 fn appointments_stored_using_determined_file_name() {
     common::setup();
     let current_date = Local::now().format("%d%m%Y").to_string();
-    let appointments_file = dirs::data_dir().unwrap().join("todayiwill").join(format!("appointments_{current_date}.txt"));
+    let appointments_file = dirs::data_dir()
+        .unwrap()
+        .join("todayiwill")
+        .join(format!("appointments_{current_date}.txt"));
     assert!(!appointments_file.exists());
 
     Command::cargo_bin("todayiwill")
