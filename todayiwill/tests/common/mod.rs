@@ -14,7 +14,11 @@ pub fn setup() {
 
 /// Clears the appointments file
 pub fn remove_all_appointment_files() {
-    for entry in app_data_dir()
+    let app_data_dir = app_data_dir();
+    if !app_data_dir.exists() {
+        return;
+    }
+    for entry in app_data_dir
         .read_dir()
         .expect("Failed to access data dir")
     {
