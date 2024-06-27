@@ -391,7 +391,6 @@ fn list_invalid_entries_current_time() {
 
 #[test]
 #[serial]
-#[ignore = "facing github actions issues when running this test"]
 fn appointments_stored_using_determined_file_name() {
     common::setup();
 
