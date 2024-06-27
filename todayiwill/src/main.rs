@@ -1,6 +1,6 @@
 use std::process;
 
-use chrono::{Local, NaiveDate};
+use chrono::NaiveDate;
 use clap::{Parser, Subcommand};
 
 extern crate chrono;
@@ -54,7 +54,7 @@ enum Commands {
     /// List the appointments for other days
     History {
         /// Show appointments which will expire in X seconds
-        #[arg(short, long, value_parser=helper::str_dmy_to_naive_date, default_value_t=Local::now().date_naive())]
+        #[arg(short, long, value_parser=helper::str_dmy_to_naive_date)]
         date: NaiveDate,
     },
 }
