@@ -1,5 +1,5 @@
 use assert_cmd::Command;
-use chrono::Local;
+use chrono::{Local, NaiveDate};
 use serial_test::serial;
 
 mod common;
@@ -21,7 +21,9 @@ fn empty_list() {
 #[serial]
 fn list_appointments() {
     common::setup();
-    common::helper_write_to_data_file(b"08:12 Call mom\n14:45 Listen to music\n");
+    common::helper_write_to_appointment_current_day_data_file(
+        b"08:12 Call mom\n14:45 Listen to music\n",
+    );
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -30,7 +32,7 @@ fn list_appointments() {
         .success()
         .stdout("08:12 Call mom\n14:45 Listen to music\n");
 
-    common::helper_remove_data_file();
+    common::remove_all_appointment_files();
 }
 
 #[test]
@@ -60,7 +62,7 @@ fn add_appointment() {
         .success()
         .stdout("16:50 A certain event\n");
 
-    common::helper_remove_data_file();
+    common::remove_all_appointment_files();
 }
 
 #[test]
@@ -104,7 +106,7 @@ fn clear_appointments() {
         .success()
         .stdout("There are no appointments added for today.\n");
 
-    common::helper_remove_data_file();
+    common::remove_all_appointment_files();
 }
 
 #[test]
@@ -170,7 +172,7 @@ fn list_current_time() {
         .success()
         .stdout("19:00 Clean bedroom\n22:30 Brush teeth\n");
 
-    common::helper_remove_data_file();
+    common::remove_all_appointment_files();
 }
 
 #[test]
@@ -243,7 +245,7 @@ fn list_expire_in_x_mins() {
         .success()
         .stdout("No appointments found.\n");
 
-    common::helper_remove_data_file();
+    common::remove_all_appointment_files();
 }
 
 #[test]
@@ -432,4 +434,16 @@ fn appointment_history() {
         .assert()
         .success()
         .stdout("There are no appointments added this day.\n");
+
+    common::helper_write_to_appointment_data_file(
+        b"13:12 An appointment added on 01/01/2024",
+        NaiveDate::from_ymd_opt(2024, 1, 1).unwrap(),
+    );
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["history", "--date", "01/01/2023"])
+        .assert()
+        .success()
+        .stdout("13:12 An appointment added on 01/01/2024\n");
 }
