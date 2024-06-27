@@ -18,10 +18,7 @@ pub fn remove_all_appointment_files() {
     if !app_data_dir.exists() {
         return;
     }
-    for entry in app_data_dir
-        .read_dir()
-        .expect("Failed to access data dir")
-    {
+    for entry in app_data_dir.read_dir().expect("Failed to access data dir") {
         if let Ok(entry) = entry {
             match fs::remove_file(entry.path()) {
                 Err(error) => panic!("Failed to remove data file. {error}"),
