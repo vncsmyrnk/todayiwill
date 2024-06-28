@@ -54,7 +54,7 @@ docker run --rm -it \
     -u dev \
     --cpus 2 \
     --workdir /home/dev/app \
-    ghcr.io/vncsmyrnk/rust-17.9-slim-dev:latest bash
+    ghcr.io/vncsmyrnk/rust-dev:latest bash
 ```
 
 ### Dev Tools

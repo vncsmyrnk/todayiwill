@@ -27,4 +27,4 @@ jobs:
         with:
           push: true
           tags: |
-            ghcr.io/vncsmyrnk/rust-17.9-slim-dev:latest
+            ghcr.io/vncsmyrnk/rust-dev:latest
