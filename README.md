@@ -47,11 +47,16 @@ bash <(wget -O- https://github.com/vncsmyrnk/todayiwill/releases/latest/download
 
 ```bash
 docker run --rm -it \
-    -v "$(pwd)":/opt/app \
-    -v ~/.ssh:/root/.ssh \
+    -v "$(pwd)":/home/dev/app \
+    -v ~/.ssh:/home/dev/.ssh \
     -e GIT_USERNAME="$(git config --list | grep "user.name" | cut -d = -f2)" \
     -e GIT_EMAIL="$(git config --list | grep "user.email" | cut -d = -f2)" \
+    -u dev \
     --cpus 2 \
-    --workdir /opt/app \
-    rust:1.79-slim bash
+    --workdir /home/dev/app \
+    ghcr.io/vncsmyrnk/rust-17.9-slim-dev:latest bash
 ```
+
+### Dev Tools
+
+Once inside the container, you can run `$ sudo -E ./dev-setup.sh` to install dev dependencies like `git` and `nvim`.
