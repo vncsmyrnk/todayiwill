@@ -1,5 +1,6 @@
 use std::process;
 
+use chrono::NaiveDate;
 use clap::{Parser, Subcommand};
 
 extern crate chrono;
@@ -20,7 +21,7 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    /// Add appointment
+    /// Add appointment for today
     Add {
         /// Appointment description
         #[arg(short, long)]
@@ -34,9 +35,9 @@ enum Commands {
         #[arg(short, long, value_parser=AppointmentTime::from, default_value_t=AppointmentTime::now())]
         current_time: AppointmentTime,
     },
-    /// Clear all the appointments added until now
+    /// Clear all the appointments added for today
     Clear,
-    /// List the appointments to come
+    /// List the appointments to come for today
     List {
         /// Current time, defaults to system time
         #[arg(short, long, value_parser=AppointmentTime::from, default_value_t=AppointmentTime::now())]
@@ -49,6 +50,12 @@ enum Commands {
         /// If informed, all appointments are retrieved
         #[arg(short, long, default_value_t = false)]
         all: bool,
+    },
+    /// List the appointments for other days
+    History {
+        /// Show appointments which will expire in X seconds
+        #[arg(short, long, value_parser=helper::str_dmy_to_naive_date)]
+        date: NaiveDate,
     },
 }
 
@@ -108,5 +115,6 @@ fn main() {
             list::display_list(ref_time, ref_expiration, config)
         }
         Commands::Clear => clear::clear_appointments(config),
+        Commands::History { date } => list::display_all_from(date, config),
     }
 }

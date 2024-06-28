@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use chrono::{Local, NaiveDate};
 use serial_test::serial;
 
 mod common;
@@ -14,13 +15,17 @@ fn empty_list() {
         .assert()
         .success()
         .stdout("There are no appointments added for today.\n");
+
+    common::remove_all_appointment_files();
 }
 
 #[test]
 #[serial]
 fn list_appointments() {
     common::setup();
-    common::helper_write_to_data_file(b"08:12 Call mom\n14:45 Listen to music\n");
+    common::helper_write_to_appointment_current_day_data_file(
+        b"08:12 Call mom\n14:45 Listen to music\n",
+    );
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -29,7 +34,7 @@ fn list_appointments() {
         .success()
         .stdout("08:12 Call mom\n14:45 Listen to music\n");
 
-    common::helper_remove_data_file();
+    common::remove_all_appointment_files();
 }
 
 #[test]
@@ -59,7 +64,7 @@ fn add_appointment() {
         .success()
         .stdout("16:50 A certain event\n");
 
-    common::helper_remove_data_file();
+    common::remove_all_appointment_files();
 }
 
 #[test]
@@ -103,7 +108,7 @@ fn clear_appointments() {
         .success()
         .stdout("There are no appointments added for today.\n");
 
-    common::helper_remove_data_file();
+    common::remove_all_appointment_files();
 }
 
 #[test]
@@ -169,7 +174,7 @@ fn list_current_time() {
         .success()
         .stdout("19:00 Clean bedroom\n22:30 Brush teeth\n");
 
-    common::helper_remove_data_file();
+    common::remove_all_appointment_files();
 }
 
 #[test]
@@ -242,14 +247,12 @@ fn list_expire_in_x_mins() {
         .success()
         .stdout("No appointments found.\n");
 
-    common::helper_remove_data_file();
+    common::remove_all_appointment_files();
 }
 
 #[test]
 #[serial]
 fn add_invalid_entries_for_time() {
-    common::setup();
-
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args(["add", "--description", "A certain event", "--time", "9:y3"])
@@ -278,8 +281,6 @@ fn add_invalid_entries_for_time() {
 #[test]
 #[serial]
 fn add_invalid_entries_for_current_time() {
-    common::setup();
-
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args([
@@ -345,9 +346,32 @@ fn add_invalid_entries_for_current_time() {
 
 #[test]
 #[serial]
-fn list_invalid_entries_current_time() {
-    common::setup();
+fn add_invalid_entries_missing_parameters() {
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--time", "22:03"])
+        .assert()
+        .failure()
+        .code(2);
 
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--description", "Wash the kitchen floor"])
+        .assert()
+        .failure()
+        .code(2);
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add"])
+        .assert()
+        .failure()
+        .code(2);
+}
+
+#[test]
+#[serial]
+fn list_invalid_entries_current_time() {
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args(["list", "--current-time", "23:60"])
@@ -358,6 +382,113 @@ fn list_invalid_entries_current_time() {
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args(["list", "--current-time", "as:"])
+        .assert()
+        .failure()
+        .code(2);
+}
+
+#[test]
+#[serial]
+fn appointments_stored_using_determined_file_name() {
+    common::setup();
+
+    let current_date = Local::now().format("%d%m%Y").to_string();
+    let appointments_file = dirs::data_dir()
+        .unwrap()
+        .join("todayiwill")
+        .join(format!("appointments_{current_date}.txt"));
+    assert!(
+        !appointments_file.exists(),
+        "File \"{}\" exists when it should not",
+        appointments_file.to_str().unwrap()
+    );
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Check sink problem",
+            "--time",
+            "09:56",
+            "--current-time",
+            "09:00",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    assert!(appointments_file.exists());
+
+    common::remove_all_appointment_files();
+}
+
+#[test]
+#[serial]
+fn appointment_history() {
+    common::setup();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Work on my art portfolio",
+            "--time",
+            "18:40",
+            "--current-time",
+            "09:00",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "history",
+            "--date",
+            Local::now().format("%d/%m/%Y").to_string().as_str(),
+        ])
+        .assert()
+        .success()
+        .stdout("18:40 Work on my art portfolio\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["history", "--date", "01/01/2024"])
+        .assert()
+        .success()
+        .stdout("There are no appointments added this day.\n");
+
+    common::helper_write_to_appointment_data_file(
+        b"13:12 An appointment added on 01/01/2024",
+        NaiveDate::from_ymd_opt(2024, 1, 1).unwrap(),
+    );
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["history", "--date", "01/01/2024"])
+        .assert()
+        .success()
+        .stdout("13:12 An appointment added on 01/01/2024\n");
+
+    common::remove_all_appointment_files();
+}
+
+#[test]
+#[serial]
+fn history_invalid_entries() {
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["history"])
+        .assert()
+        .failure()
+        .code(2);
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["history", "--date", "01-2023-22"])
         .assert()
         .failure()
         .code(2);
