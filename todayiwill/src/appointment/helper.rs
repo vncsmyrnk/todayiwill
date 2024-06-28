@@ -1,4 +1,7 @@
+use notify_rust::{Notification, NotificationHandle};
 use chrono::{NaiveDate, ParseError};
+
+use super::Appointment;
 
 /// Parses string time (hours and minutes) and returns a tuple with both values
 /// `10:43` -> Option<(10, 43)>
@@ -18,6 +21,15 @@ pub fn date_code(date: NaiveDate) -> String {
 /// Converts a string to a naive date
 pub fn str_dmy_to_naive_date(date: &str) -> Result<NaiveDate, ParseError> {
     NaiveDate::parse_from_str(date, "%d/%m/%Y")
+}
+
+#[allow(dead_code)]
+/// Displays a system notification reminding the user of an appointment
+pub fn notify_appointment(appointment: Appointment) -> Result<NotificationHandle, notify_rust::error::Error> {
+    Notification::new()
+        .summary("Reminder")
+        .body(&appointment.description)
+        .show()
 }
 
 #[cfg(test)]

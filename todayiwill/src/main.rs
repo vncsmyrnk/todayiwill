@@ -2,10 +2,10 @@ use std::process;
 
 use chrono::NaiveDate;
 use clap::{Parser, Subcommand};
-use notify_rust::Notification;
 
 extern crate chrono;
 extern crate dirs;
+extern crate cronjob;
 
 mod appointment;
 
@@ -58,11 +58,10 @@ enum Commands {
         #[arg(short, long, value_parser=helper::str_dmy_to_naive_date)]
         date: NaiveDate,
     },
-    /// Make a test notification visible
-    Notify,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = Cli::parse();
     let config = Config::default();
 
@@ -119,8 +118,5 @@ fn main() {
         }
         Commands::Clear => clear::clear_appointments(config),
         Commands::History { date } => list::display_all_from(date, config),
-        Commands::Notify => {
-            Notification::new().show().expect("Failed to display message");
-        }
     }
 }

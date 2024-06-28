@@ -49,7 +49,7 @@ bash <(wget -O- https://github.com/vncsmyrnk/todayiwill/releases/latest/download
 docker run --rm -it \
     -v "$(pwd)":/home/dev/app \
     -v ~/.ssh:/home/dev/.ssh \
-    -v /var/run/dbus:/var/run/dbus \
+    -v /run/user/1000/bus:/run/user/1000/bus \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
     -e DISPLAY="$DISPLAY" \
