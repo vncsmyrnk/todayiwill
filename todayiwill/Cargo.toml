@@ -9,4 +9,5 @@ cargo-llvm-cov = "0.6.10"
 chrono = "0.4.38"
 clap = { version = "4.5.7", features = ["derive"] }
 dirs = "5.0.1"
+notify-rust = "4.11.0"
 serial_test = "3.1.1"

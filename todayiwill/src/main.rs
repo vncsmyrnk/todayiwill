@@ -2,6 +2,7 @@ use std::process;
 
 use chrono::NaiveDate;
 use clap::{Parser, Subcommand};
+use notify_rust::Notification;
 
 extern crate chrono;
 extern crate dirs;
@@ -57,6 +58,8 @@ enum Commands {
         #[arg(short, long, value_parser=helper::str_dmy_to_naive_date)]
         date: NaiveDate,
     },
+    /// Make a test notification visible
+    Notify,
 }
 
 fn main() {
@@ -116,5 +119,8 @@ fn main() {
         }
         Commands::Clear => clear::clear_appointments(config),
         Commands::History { date } => list::display_all_from(date, config),
+        Commands::Notify => {
+            Notification::new().show().expect("Failed to display message");
+        }
     }
 }
