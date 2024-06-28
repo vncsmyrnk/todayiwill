@@ -11,7 +11,6 @@ USER dev
 RUN <<EOF
 sh <(curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs) -y
 source $HOME/.cargo/env
-rustup component add fmt clippy
 EOF
 WORKDIR /home/dev
 LABEL description="This is a docker image that offers tools for \
