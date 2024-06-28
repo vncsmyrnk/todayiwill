@@ -8,7 +8,6 @@ use chrono::{Local, NaiveDate};
 
 /// Provides the startup scripts for each test execution
 pub fn setup() {
-    // helper_remove_data_file()
     remove_all_appointment_files()
 }
 

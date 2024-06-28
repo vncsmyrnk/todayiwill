@@ -15,6 +15,8 @@ fn empty_list() {
         .assert()
         .success()
         .stdout("There are no appointments added for today.\n");
+
+    common::remove_all_appointment_files();
 }
 
 #[test]
@@ -251,8 +253,6 @@ fn list_expire_in_x_mins() {
 #[test]
 #[serial]
 fn add_invalid_entries_for_time() {
-    common::setup();
-
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args(["add", "--description", "A certain event", "--time", "9:y3"])
@@ -372,8 +372,6 @@ fn add_invalid_entries_missing_parameters() {
 #[test]
 #[serial]
 fn list_invalid_entries_current_time() {
-    common::setup();
-
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args(["list", "--current-time", "23:60"])
@@ -421,6 +419,8 @@ fn appointments_stored_using_determined_file_name() {
         .stdout("Appointment added successfully.\n");
 
     assert!(appointments_file.exists());
+
+    common::remove_all_appointment_files();
 }
 
 #[test]
@@ -472,6 +472,8 @@ fn appointment_history() {
         .assert()
         .success()
         .stdout("13:12 An appointment added on 01/01/2024\n");
+
+    common::remove_all_appointment_files();
 }
 
 #[test]
