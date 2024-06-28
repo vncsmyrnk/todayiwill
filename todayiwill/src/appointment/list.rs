@@ -40,7 +40,7 @@ pub fn display_all_from(date: NaiveDate, config: Config) {
     let mut appointments =
         get_appointments_from_file(&(config.appointment_file_path_builder)(date));
     if appointments.is_empty() {
-        println!("There are no appointments added this day.");
+        println!("There were no appointments added in this day.");
         return;
     }
     appointments.sort();
