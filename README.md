@@ -10,7 +10,7 @@
 
 A CLI reminder app that offers a simple yet powerful solution to enhance productivity and ensure that you stay on top of your daily responsibilities. Unlike complex project management tools, a CLI app provides a lightweight and straightforward interface that integrates seamlessly into the workflows of developers, system administrators, and tech-savvy users who spend a significant portion of their day in the terminal.
 
-## Examples
+## 🚀 Examples
 
 ```bash
 $ todayiwill add --description "Take my dog to the vet" --time "14:00"
@@ -21,7 +21,7 @@ Appointment added successfully
 $ todayiwill list
 14:00 Take my dog to the vet
 ```
-## Install
+## 💽 Install
 
 ### Ubuntu/debian
 
@@ -29,13 +29,13 @@ $ todayiwill list
 bash <(wget -O- https://github.com/vncsmyrnk/todayiwill/releases/latest/download/install-linux-debian.sh 2> /dev/null)
 ```
 
-## Coming soon...
+## 🛠 Coming soon...
 
 Check the [opened issues](https://github.com/vncsmyrnk/todayiwill/issues) section to know what will soon be available.
 
 Access the [closed PR](https://github.com/vncsmyrnk/todayiwill/pulls?q=is%3Apr+is%3Aclosed) section to know what was done so far.
 
-## Uninstall
+## 🗑 Uninstall
 
 ### Ubuntu/debian
 
@@ -43,7 +43,7 @@ Access the [closed PR](https://github.com/vncsmyrnk/todayiwill/pulls?q=is%3Apr+i
 bash <(wget -O- https://github.com/vncsmyrnk/todayiwill/releases/latest/download/uninstall-linux-debian.sh 2> /dev/null)
 ```
 
-## Development with docker
+## 🔧 Development with docker
 
 ```bash
 docker run --rm -it \
