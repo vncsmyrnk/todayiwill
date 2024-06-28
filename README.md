@@ -34,6 +34,8 @@ $ todayiwill list
 
 Check the [opened issues](https://github.com/vncsmyrnk/todayiwill/issues) section to know what will soon be available.
 
+Access the [closed PR](https://github.com/vncsmyrnk/todayiwill/pulls?q=is%3Apr+is%3Aclosed) section to know what was done so far.
+
 ## Development with docker
 
 ```bash
