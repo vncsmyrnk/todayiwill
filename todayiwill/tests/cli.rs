@@ -459,7 +459,7 @@ fn appointment_history() {
         .args(["history", "--date", "01/01/2024"])
         .assert()
         .success()
-        .stdout("There are no appointments added this day.\n");
+        .stdout("There were no appointments added in this day.\n");
 
     common::helper_write_to_appointment_data_file(
         b"13:12 An appointment added on 01/01/2024",
