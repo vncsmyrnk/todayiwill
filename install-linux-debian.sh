@@ -5,7 +5,7 @@ stdout_file=/dev/null
 
 handle_error() {
   echo -e "\033[1;31m[Error]\033[0m $1"
-  echo -e "Check file \033[1m$stderr_file\033[0m for more info"
+  echo -e "Check file \033[1m$stderr_file\033[0m for more info. Make sure to uninstall previous installations"
   exit 1
 }
 
