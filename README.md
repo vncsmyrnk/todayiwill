@@ -4,7 +4,7 @@
 [![Release workflow](https://github.com/vncsmyrnk/todayiwill/actions/workflows/release.yml/badge.svg)](https://github.com/vncsmyrnk/todayiwill/actions/workflows/release.yml)
 ![Rust](https://img.shields.io/badge/rust-1.79+-green?logo=rust)
 [![codecov](https://codecov.io/gh/vncsmyrnk/todayiwill/graph/badge.svg?token=WN27CKCC6W)](https://codecov.io/gh/vncsmyrnk/todayiwill)
-![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-gray?logo=githubactions)
+[![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-gray?logo=githubactions)](https://github.com/vncsmyrnk/todayiwill/actions)
 [![contributions](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/vncsmyrnk/todayiwill/issues)
 [![Issue count](https://img.shields.io/github/issues-search?query=repo%3Avncsmyrnk%2Ftodayiwill%20is%3Aopen&label=open%20issues)](https://github.com/vncsmyrnk/todayiwill/issues)
 
