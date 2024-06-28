@@ -41,6 +41,7 @@ jobs:
           path: |
             ./todayiwill/target/release
             ./install-*
+            ./uninstall-*
 
   release:
     needs: build
@@ -71,6 +72,7 @@ jobs:
           files: |
             artifacts/todayiwill/target/release/todayiwill
             artifacts/install-*
+            artifacts/uninstall-*
           body: |
             # Changelog
 
