@@ -5,7 +5,6 @@ use clap::{Parser, Subcommand};
 
 extern crate chrono;
 extern crate dirs;
-extern crate cronjob;
 
 mod appointment;
 
@@ -60,8 +59,7 @@ enum Commands {
     },
 }
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let args = Cli::parse();
     let config = Config::default();
 

@@ -8,8 +8,5 @@ assert_cmd = "2.0.14"
 cargo-llvm-cov = "0.6.10"
 chrono = "0.4.38"
 clap = { version = "4.5.7", features = ["derive"] }
-cronjob = "0.4.17"
 dirs = "5.0.1"
-notify-rust = "4.11.0"
 serial_test = "3.1.1"
-tokio = { version = "1.38.0", features = ["full"] }
