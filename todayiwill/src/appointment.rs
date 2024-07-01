@@ -16,7 +16,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn default() -> Self {
+    pub fn standard() -> Self {
         let appointment_path_builder = |date: NaiveDate| {
             dirs::data_dir()
                 .unwrap()
@@ -226,7 +226,7 @@ mod tests {
 
     #[test]
     fn config_default_should_return_a_builder_fn() {
-        let result = (Config::default().appointment_file_path_builder)(
+        let result = (Config::standard().appointment_file_path_builder)(
             NaiveDate::from_ymd_opt(2023, 10, 21).unwrap(),
         );
         assert_eq!(
