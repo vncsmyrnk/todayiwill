@@ -61,7 +61,7 @@ enum Commands {
 
 fn main() {
     let args = Cli::parse();
-    let config = Config::default();
+    let config = Config::standard();
 
     match args.command {
         Commands::Add {
