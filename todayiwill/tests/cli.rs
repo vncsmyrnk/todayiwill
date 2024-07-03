@@ -493,3 +493,54 @@ fn history_invalid_entries() {
         .failure()
         .code(2);
 }
+
+#[test]
+#[serial]
+#[ignore]
+fn add_from_stdin_should_be_possible() {
+    common::setup();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add-stdin",
+            "20:46 Finish final assingment",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--current-time", "09:30"])
+        .assert()
+        .success()
+        .stdout("20:46 Finish final assingment\n");
+}
+
+#[test]
+#[serial]
+#[ignore]
+fn add_from_stdin_should_error_on_invalid_entries() {
+    common::setup();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add-stdin",
+            "1204 A malformed appointment",
+        ])
+        .assert()
+        .failure()
+        .code(2);
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add-stdin",
+            "Unformatted 10:34 appointment",
+        ])
+        .assert()
+        .failure()
+        .code(2);
+}
