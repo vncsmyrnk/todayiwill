@@ -24,16 +24,20 @@ enum Commands {
     /// Add appointment for today
     Add {
         /// Appointment description
-        #[arg(short, long)]
-        description: String,
+        #[arg(short, long, required_unless_present("stdin"))]
+        description: Option<String>,
 
         /// Appointment time
-        #[arg(short, long)]
-        time: String,
+        #[arg(short, long, required_unless_present("stdin"))]
+        time: Option<AppointmentTime>,
 
         /// Current time, defaults to system time
-        #[arg(short, long, value_parser=AppointmentTime::from, default_value_t=AppointmentTime::now())]
+        #[arg(short, long, default_value_t=AppointmentTime::now())]
         current_time: AppointmentTime,
+
+        /// Parses an appointment as a string ("hh:mm appointment content")
+        #[arg(long, required(false), exclusive(true))]
+        stdin: Option<Appointment>,
     },
     /// Clear all the appointments added for today
     Clear,
@@ -60,44 +64,41 @@ enum Commands {
 }
 
 fn main() {
-    let args = Cli::parse();
+    let parse_result = parse_input();
+    match parse_result {
+        Ok(..) => (),
+        Err(error) => {
+            eprintln!("{}", error);
+            process::exit(1);
+        }
+    }
+}
+
+fn parse_input() -> Result<(), String> {
     let config = Config::standard();
+    let args = Cli::parse();
 
     match args.command {
         Commands::Add {
             description,
             time,
             current_time,
+            stdin,
         } => {
-            let result = helper::parse_time(&time);
-            let (hour, minutes) = match result {
-                Some((hour, minutes)) => (hour, minutes),
-                None => {
-                    println!("You entered a non-valid time.");
-                    process::exit(1)
-                }
-            };
+            if stdin.is_some() {
+                let appointment = stdin.unwrap();
+                return add_appointment(appointment);
+            }
 
-            let appointment_time = match AppointmentTime::new(hour, minutes) {
-                Ok(at) => at,
-                Err(error) => {
-                    println!("Appointment time invalid. {}", error);
-                    process::exit(1)
-                }
-            };
+            let appointment_description =
+                description.expect("Description should be available here");
+            let appointment_time = time.expect("Time should be available here");
 
             if appointment_time <= current_time {
-                println!("Given time already passed.");
-                process::exit(1)
+                return Err(String::from("Given time already passed."));
             }
 
-            match add::add_appointment(Appointment::new(description, appointment_time), config) {
-                Ok(..) => (),
-                Err(error) => {
-                    println!("An error occurred. {}", error);
-                    process::exit(1)
-                }
-            }
+            add_appointment(Appointment::new(appointment_description, appointment_time))?;
         }
         Commands::List {
             current_time,
@@ -112,9 +113,18 @@ fn main() {
                 -1 => None,
                 other => Some(other),
             };
-            list::display_list(ref_time, ref_expiration, config)
+            list::display_list(ref_time, ref_expiration, config);
         }
         Commands::Clear => clear::clear_appointments(config),
         Commands::History { date } => list::display_all_from(date, config),
+    }
+
+    Ok(())
+}
+
+fn add_appointment(appointment: Appointment) -> Result<(), String> {
+    match add::add_appointment(appointment, Config::standard()) {
+        Ok(..) => Ok(()),
+        Err(error) => Err(format!("Error while saving appointment: {}", error)),
     }
 }
