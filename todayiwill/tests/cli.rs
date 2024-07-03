@@ -259,8 +259,12 @@ fn add_invalid_entries_for_time() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: invalid value '9:y3' for '--time <TIME>': Invalid string for appointment time\n\nFor more information, try '--help'.\n");
-   
+        .stderr(
+            r#"error: invalid value '9:y3' for '--time <TIME>': Invalid string for appointment time
+
+For more information, try '--help'.
+"#,
+        );
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -268,7 +272,12 @@ fn add_invalid_entries_for_time() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: invalid value '24:10' for '--time <TIME>': Hour should be between 0 and 23\n\nFor more information, try '--help'.\n");
+        .stderr(
+            r#"error: invalid value '24:10' for '--time <TIME>': Hour should be between 0 and 23
+
+For more information, try '--help'.
+"#,
+        );
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -276,7 +285,12 @@ fn add_invalid_entries_for_time() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: invalid value '15:60' for '--time <TIME>': Minutes should be between 0 and 59\n\nFor more information, try '--help'.\n");
+        .stderr(
+            r#"error: invalid value '15:60' for '--time <TIME>': Minutes should be between 0 and 59
+
+For more information, try '--help'.
+"#,
+        );
 }
 
 #[test]
@@ -328,8 +342,10 @@ fn add_invalid_entries_for_current_time() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: invalid value '23:60' for '--current-time <CURRENT_TIME>': Minutes should be between 0 and 59\n\nFor more information, try '--help'.\n");
+        .stderr(r#"error: invalid value '23:60' for '--current-time <CURRENT_TIME>': Minutes should be between 0 and 59
 
+For more information, try '--help'.
+"#);
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -345,7 +361,10 @@ fn add_invalid_entries_for_current_time() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: invalid value '10:00pm' for '--current-time <CURRENT_TIME>': Invalid string for appointment time\n\nFor more information, try '--help'.\n");
+        .stderr(r#"error: invalid value '10:00pm' for '--current-time <CURRENT_TIME>': Invalid string for appointment time
+
+For more information, try '--help'.
+"#);
 }
 
 #[test]
@@ -357,7 +376,15 @@ fn add_invalid_entries_missing_parameters() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: the following required arguments were not provided:\n  --description <DESCRIPTION>\n\nUsage: todayiwill add --time <TIME> --description <DESCRIPTION>\n\nFor more information, try '--help'.\n");
+        .stderr(
+            r#"error: the following required arguments were not provided:
+  --description <DESCRIPTION>
+
+Usage: todayiwill add --time <TIME> --description <DESCRIPTION>
+
+For more information, try '--help'.
+"#,
+        );
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -365,7 +392,15 @@ fn add_invalid_entries_missing_parameters() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: the following required arguments were not provided:\n  --time <TIME>\n\nUsage: todayiwill add --description <DESCRIPTION> --time <TIME>\n\nFor more information, try '--help'.\n");
+        .stderr(
+            r#"error: the following required arguments were not provided:
+  --time <TIME>
+
+Usage: todayiwill add --description <DESCRIPTION> --time <TIME>
+
+For more information, try '--help'.
+"#,
+        );
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -373,7 +408,16 @@ fn add_invalid_entries_missing_parameters() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: the following required arguments were not provided:\n  --description <DESCRIPTION>\n  --time <TIME>\n\nUsage: todayiwill add --description <DESCRIPTION> --time <TIME>\n\nFor more information, try '--help'.\n");
+        .stderr(
+            r#"error: the following required arguments were not provided:
+  --description <DESCRIPTION>
+  --time <TIME>
+
+Usage: todayiwill add --description <DESCRIPTION> --time <TIME>
+
+For more information, try '--help'.
+"#,
+        );
 }
 
 #[test]
@@ -385,7 +429,10 @@ fn list_invalid_entries_current_time() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: invalid value '23:60' for '--current-time <CURRENT_TIME>': Minutes should be between 0 and 59\n\nFor more information, try '--help'.\n");
+        .stderr(r#"error: invalid value '23:60' for '--current-time <CURRENT_TIME>': Minutes should be between 0 and 59
+
+For more information, try '--help'.
+"#);
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -393,7 +440,10 @@ fn list_invalid_entries_current_time() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: invalid value 'as:' for '--current-time <CURRENT_TIME>': Invalid string for appointment time\n\nFor more information, try '--help'.\n");
+        .stderr(r#"error: invalid value 'as:' for '--current-time <CURRENT_TIME>': Invalid string for appointment time
+
+For more information, try '--help'.
+"#);
 }
 
 #[test]
@@ -494,7 +544,15 @@ fn history_invalid_entries() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: the following required arguments were not provided:\n  --date <DATE>\n\nUsage: todayiwill history --date <DATE>\n\nFor more information, try '--help'.\n");
+        .stderr(
+            r#"error: the following required arguments were not provided:
+  --date <DATE>
+
+Usage: todayiwill history --date <DATE>
+
+For more information, try '--help'.
+"#,
+        );
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -502,7 +560,10 @@ fn history_invalid_entries() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: invalid value '01-2023-22' for '--date <DATE>': input contains invalid characters\n\nFor more information, try '--help'.\n");
+        .stderr(r#"error: invalid value '01-2023-22' for '--date <DATE>': input contains invalid characters
+
+For more information, try '--help'.
+"#);
 }
 
 #[test]
@@ -512,22 +573,14 @@ fn add_from_stdin_should_be_possible() {
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args([
-            "add",
-            "--stdin",
-            "20:46 Finish final assingment",
-        ])
+        .args(["add", "--stdin", "20:46 Finish final assingment"])
         .assert()
         .success()
         .stdout("Appointment added successfully.\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args([
-            "add",
-            "--stdin",
-            "16:23 Read another chapter of moby dick",
-        ])
+        .args(["add", "--stdin", "16:23 Read another chapter of moby dick"])
         .assert()
         .success()
         .stdout("Appointment added successfully.\n");
@@ -557,7 +610,10 @@ fn add_from_stdin_should_error_on_invalid_entries() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: invalid value '1204 A malformed appointment' for '--stdin <STDIN>': Invalid string for appointment time\n\nFor more information, try '--help'.\n");
+        .stderr(r#"error: invalid value '1204 A malformed appointment' for '--stdin <STDIN>': Invalid string for appointment time
+
+For more information, try '--help'.
+"#);
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -569,5 +625,8 @@ fn add_from_stdin_should_error_on_invalid_entries() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: invalid value 'Unformatted 10:34 appointment' for '--stdin <STDIN>': Invalid string for appointment time\n\nFor more information, try '--help'.\n");
+        .stderr(r#"error: invalid value 'Unformatted 10:34 appointment' for '--stdin <STDIN>': Invalid string for appointment time
+
+For more information, try '--help'.
+"#);
 }

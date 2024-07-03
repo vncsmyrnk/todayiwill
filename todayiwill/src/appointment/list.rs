@@ -67,10 +67,7 @@ pub fn get_appointments_from_file(path: &PathBuf) -> Vec<Appointment> {
 mod tests {
     use std::{fs, fs::File, io::Write, path::PathBuf};
 
-    use crate::appointment::{
-        list::get_appointments_from_file,
-        Appointment, AppointmentTime,
-    };
+    use crate::appointment::{list::get_appointments_from_file, Appointment, AppointmentTime};
 
     #[test]
     fn parse_file_contents() {

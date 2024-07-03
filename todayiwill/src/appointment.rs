@@ -115,7 +115,7 @@ impl Appointment {
         Self { description, time }
     }
 
-    pub fn from(appointment: &str) -> Result<Self, String>{
+    pub fn from(appointment: &str) -> Result<Self, String> {
         let time: String = appointment.chars().take(5).collect();
         let appointment_time = AppointmentTime::from(&time)?;
         let description = appointment.chars().skip(6).collect();
@@ -259,13 +259,25 @@ mod tests {
     #[test]
     fn create_appointment_from_str() {
         let result = Appointment::from("05:06 Take the bus");
-        assert_eq!(result.unwrap(), Appointment { description: String::from("Take the bus"), time: AppointmentTime::new(5, 6).unwrap() });
+        assert_eq!(
+            result.unwrap(),
+            Appointment {
+                description: String::from("Take the bus"),
+                time: AppointmentTime::new(5, 6).unwrap()
+            }
+        );
     }
 
     #[test]
     fn create_appointment_from_str_edge_case() {
         let result = Appointment::from("23:59 A very late appointment");
-        assert_eq!(result.unwrap(), Appointment { description: String::from("A very late appointment"), time: AppointmentTime::new(23, 59).unwrap() });
+        assert_eq!(
+            result.unwrap(),
+            Appointment {
+                description: String::from("A very late appointment"),
+                time: AppointmentTime::new(23, 59).unwrap()
+            }
+        );
     }
 
     #[test]

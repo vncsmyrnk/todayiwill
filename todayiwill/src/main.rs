@@ -90,7 +90,8 @@ fn parse_input() -> Result<(), String> {
                 return add_appointment(appointment);
             }
 
-            let appointment_description = description.expect("Description should be available here");
+            let appointment_description =
+                description.expect("Description should be available here");
             let appointment_time = time.expect("Time should be available here");
 
             if appointment_time <= current_time {
@@ -124,6 +125,6 @@ fn parse_input() -> Result<(), String> {
 fn add_appointment(appointment: Appointment) -> Result<(), String> {
     match add::add_appointment(appointment, Config::standard()) {
         Ok(..) => Ok(()),
-        Err(error) => Err(format!("Error while saving appointment: {}", error))
+        Err(error) => Err(format!("Error while saving appointment: {}", error)),
     }
 }
