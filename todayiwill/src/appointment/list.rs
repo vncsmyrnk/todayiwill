@@ -58,20 +58,9 @@ pub fn get_appointments_from_file(path: &PathBuf) -> Vec<Appointment> {
         Ok(content) => content,
         Err(..) => String::new(),
     };
-    let appointments: Vec<Option<Appointment>> =
-        file_content.lines().map(parse_file_line).collect();
+    let appointments: Vec<Result<Appointment, &str>> =
+        file_content.lines().map(Appointment::from).collect();
     appointments.into_iter().flatten().collect()
-}
-
-/// Parses a string representing a file line and return an appointment
-fn parse_file_line(line: &str) -> Option<Appointment> {
-    let time: String = line.chars().take(5).collect();
-    let appointment_time = match AppointmentTime::from(&time) {
-        Ok(at) => at,
-        Err(..) => return None,
-    };
-    let description = line.chars().skip(6).collect();
-    Some(Appointment::new(description, appointment_time))
 }
 
 #[cfg(test)]
@@ -79,30 +68,9 @@ mod tests {
     use std::{fs, fs::File, io::Write, path::PathBuf};
 
     use crate::appointment::{
-        list::{get_appointments_from_file, parse_file_line},
+        list::get_appointments_from_file,
         Appointment, AppointmentTime,
     };
-
-    #[test]
-    fn parse_wellformed_line() {
-        let result = parse_file_line("16:03 This is an example").unwrap();
-        assert_eq!(
-            result,
-            Appointment {
-                description: "This is an example".to_string(),
-                time: AppointmentTime {
-                    hour: 16,
-                    minutes: 3
-                }
-            }
-        );
-    }
-
-    #[test]
-    fn parse_malformed_line_time_fail() {
-        let result = parse_file_line("10:0 This is an incorrect example");
-        assert!(result.is_none());
-    }
 
     #[test]
     fn parse_file_contents() {
