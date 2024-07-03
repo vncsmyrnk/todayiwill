@@ -106,6 +106,13 @@ impl Appointment {
     pub fn new(description: String, time: AppointmentTime) -> Self {
         Self { description, time }
     }
+
+    pub fn from(appointment: &str) -> Result<Self, &str> {
+        let time: String = appointment.chars().take(5).collect();
+        let appointment_time = AppointmentTime::from(&time)?;
+        let description = appointment.chars().skip(6).collect();
+        Ok(Appointment::new(description, appointment_time))
+    }
 }
 
 impl fmt::Display for Appointment {
@@ -117,6 +124,8 @@ impl fmt::Display for Appointment {
 #[cfg(test)]
 mod tests {
     use chrono::{Local, NaiveDate};
+
+    use crate::Appointment;
 
     use super::{AppointmentTime, Config};
 
@@ -135,19 +144,22 @@ mod tests {
     #[test]
     fn malformed_appointment_time() {
         let result = AppointmentTime::new(26, -5);
-        assert!(result.is_err());
+        let err = result.err();
+        assert_eq!("Hour should be between 0 and 23", err.unwrap());
     }
 
     #[test]
     fn malformed_appointment_time_edge_case_minutes() {
         let result = AppointmentTime::new(26, 60);
-        assert!(result.is_err());
+        let err = result.err();
+        assert_eq!("Hour should be between 0 and 23", err.unwrap());
     }
 
     #[test]
     fn malformed_appointment_time_edge_case_hour() {
         let result = AppointmentTime::new(24, 5);
-        assert!(result.is_err());
+        let err = result.err();
+        assert_eq!("Hour should be between 0 and 23", err.unwrap());
     }
 
     #[test]
@@ -173,25 +185,29 @@ mod tests {
     #[test]
     fn malformed_appointment_time_from_string() {
         let result = AppointmentTime::from("102y");
-        assert!(result.is_err());
+        let err = result.err();
+        assert_eq!("Invalid string for appointment time", err.unwrap());
     }
 
     #[test]
     fn invalid_appointment_time_from_string() {
         let result = AppointmentTime::from("12:76");
-        assert!(result.is_err());
+        let err = result.err();
+        assert_eq!("Minutes should be between 0 and 59", err.unwrap());
     }
 
     #[test]
     fn invalid_appointment_time_from_string_edge_case_minutes() {
         let result = AppointmentTime::from("01:60");
-        assert!(result.is_err());
+        let err = result.err();
+        assert_eq!("Minutes should be between 0 and 59", err.unwrap());
     }
 
     #[test]
     fn invalid_appointment_time_from_string_edge_case_hour() {
         let result = AppointmentTime::from("24:43");
-        assert!(result.is_err());
+        let err = result.err();
+        assert_eq!("Hour should be between 0 and 23", err.unwrap());
     }
 
     #[test]
@@ -222,6 +238,46 @@ mod tests {
     fn add_i32_to_appointment_time_upper_limit_edge_case() {
         let result = AppointmentTime::new(23, 55).unwrap() + 4;
         assert_eq!(result, AppointmentTime::max_value());
+    }
+
+    #[test]
+    fn create_appointment_from_str() {
+        let result = Appointment::from("05:06 Take the bus");
+        assert_eq!(result.unwrap(), Appointment { description: String::from("Take the bus"), time: AppointmentTime::new(5, 6).unwrap() });
+    }
+
+    #[test]
+    fn create_appointment_from_str_edge_case() {
+        let result = Appointment::from("23:59 A very late appointment");
+        assert_eq!(result.unwrap(), Appointment { description: String::from("A very late appointment"), time: AppointmentTime::new(23, 59).unwrap() });
+    }
+
+    #[test]
+    fn create_appointment_from_str_malformed() {
+        let result = Appointment::from("16:5Fix plumbing problem");
+        let err = result.err();
+        assert_eq!("Invalid string for appointment time", err.unwrap());
+    }
+
+    #[test]
+    fn create_appointment_from_str_malformed_without_time() {
+        let result = Appointment::from("An appointment without time");
+        let err = result.err();
+        assert_eq!("Invalid string for appointment time", err.unwrap());
+    }
+
+    #[test]
+    fn create_appointment_from_str_invalid_time() {
+        let result = Appointment::from("79:81 An impossible appointment");
+        let err = result.err();
+        assert_eq!("Hour should be between 0 and 23", err.unwrap());
+    }
+
+    #[test]
+    fn create_appointment_from_str_invalid_time_edge_case() {
+        let result = Appointment::from("24:00 An impossible appointment");
+        let err = result.err();
+        assert_eq!("Hour should be between 0 and 23", err.unwrap());
     }
 
     #[test]
