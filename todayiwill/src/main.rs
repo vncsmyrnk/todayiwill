@@ -76,13 +76,13 @@ fn main() {
         } => {
             if stdin.is_some() {
                 let stdin_value = stdin.unwrap();
-                let _appointment = Appointment::from(&stdin_value);
-                println!("{stdin_value}");
+                let appointment = Appointment::from(&stdin_value).unwrap();
+                println!("{appointment}");
                 return;
            }
 
             let description_value = description.expect("Description should be available here");
-            let time_value = time.expect("Description should be available here");
+            let time_value = time.expect("Time should be available here");
 
             let result = helper::parse_time(&time_value);
             let (hour, minutes) = match result {
