@@ -121,6 +121,10 @@ impl Appointment {
         let description = appointment.chars().skip(6).collect();
         Ok(Appointment::new(description, appointment_time))
     }
+
+    pub fn to_string_display(&self) -> String {
+        format!("[{}] {}", self.time, self.description)
+    }
 }
 
 impl fmt::Display for Appointment {
@@ -320,5 +324,14 @@ mod tests {
                 .join("todayiwill")
                 .join("appointments_21102023.txt")
         );
+    }
+
+    #[test]
+    fn display_appointment() {
+        let appointment = Appointment::new(
+            String::from("Go to the dentist"),
+            AppointmentTime::new(10, 40).unwrap(),
+        );
+        assert_eq!("[10:40] Go to the dentist", appointment.to_string_display());
     }
 }

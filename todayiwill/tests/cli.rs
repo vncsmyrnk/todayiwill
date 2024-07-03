@@ -32,7 +32,7 @@ fn list_appointments() {
         .args(["list", "--all"])
         .assert()
         .success()
-        .stdout("08:12 Call mom\n14:45 Listen to music\n");
+        .stdout("[08:12] Call mom\n[14:45] Listen to music\n");
 
     common::remove_all_appointment_files();
 }
@@ -62,7 +62,7 @@ fn add_appointment() {
         .args(["list", "--all"])
         .assert()
         .success()
-        .stdout("16:50 A certain event\n");
+        .stdout("[16:50] A certain event\n");
 
     common::remove_all_appointment_files();
 }
@@ -92,7 +92,7 @@ fn clear_appointments() {
         .args(["list", "--all"])
         .assert()
         .success()
-        .stdout("20:10 An urgent event\n");
+        .stdout("[20:10] An urgent event\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -151,14 +151,14 @@ fn list_current_time() {
         .args(["list", "--current-time", "10:00"])
         .assert()
         .success()
-        .stdout("19:00 Clean bedroom\n22:30 Brush teeth\n");
+        .stdout("[19:00] Clean bedroom\n[22:30] Brush teeth\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args(["list", "--current-time", "22:29"])
         .assert()
         .success()
-        .stdout("22:30 Brush teeth\n");
+        .stdout("[22:30] Brush teeth\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -172,7 +172,7 @@ fn list_current_time() {
         .args(["list", "--current-time", "22:30", "--all"])
         .assert()
         .success()
-        .stdout("19:00 Clean bedroom\n22:30 Brush teeth\n");
+        .stdout("[19:00] Clean bedroom\n[22:30] Brush teeth\n");
 
     common::remove_all_appointment_files();
 }
@@ -217,7 +217,7 @@ fn list_expire_in_x_mins() {
         .args(["list", "--current-time", "09:30", "--expire-in", "20"])
         .assert()
         .success()
-        .stdout("09:45 Reply to an important e-mail\n");
+        .stdout("[09:45] Reply to an important e-mail\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -231,14 +231,14 @@ fn list_expire_in_x_mins() {
         .args(["list", "--current-time", "09:30", "--expire-in", "60"])
         .assert()
         .success()
-        .stdout("09:45 Reply to an important e-mail\n10:23 Schedule doctor appointment\n");
+        .stdout("[09:45] Reply to an important e-mail\n[10:23] Schedule doctor appointment\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args(["list", "--current-time", "09:30", "--expire-in", "15"])
         .assert()
         .success()
-        .stdout("09:45 Reply to an important e-mail\n");
+        .stdout("[09:45] Reply to an important e-mail\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -511,7 +511,7 @@ fn appointment_history() {
         ])
         .assert()
         .success()
-        .stdout("18:40 Work on my art portfolio\n");
+        .stdout("[18:40] Work on my art portfolio\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -530,7 +530,7 @@ fn appointment_history() {
         .args(["history", "--date", "01/01/2024"])
         .assert()
         .success()
-        .stdout("13:12 An appointment added on 01/01/2024\n");
+        .stdout("[13:12] An appointment added on 01/01/2024\n");
 
     common::remove_all_appointment_files();
 }
@@ -590,7 +590,7 @@ fn add_from_stdin_should_be_possible() {
         .args(["list", "--current-time", "09:30"])
         .assert()
         .success()
-        .stdout("16:23 Read another chapter of moby dick\n20:46 Finish final assingment\n");
+        .stdout("[16:23] Read another chapter of moby dick\n[20:46] Finish final assingment\n");
 
     common::remove_all_appointment_files();
 }
