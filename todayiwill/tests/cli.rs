@@ -503,8 +503,20 @@ fn add_from_stdin_should_be_possible() {
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args([
-            "add-stdin",
+            "add",
+            "--stdin",
             "20:46 Finish final assingment",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--stdin",
+            "16:23 Read another chapter of moby dick",
         ])
         .assert()
         .success()
@@ -515,7 +527,7 @@ fn add_from_stdin_should_be_possible() {
         .args(["list", "--current-time", "09:30"])
         .assert()
         .success()
-        .stdout("20:46 Finish final assingment\n");
+        .stdout("16:43 Read another chapter of moby dick\n20:46 Finish final assingment\n");
 }
 
 #[test]
@@ -527,7 +539,8 @@ fn add_from_stdin_should_error_on_invalid_entries() {
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args([
-            "add-stdin",
+            "add",
+            "--stdin",
             "1204 A malformed appointment",
         ])
         .assert()
@@ -537,7 +550,8 @@ fn add_from_stdin_should_error_on_invalid_entries() {
     Command::cargo_bin("todayiwill")
         .unwrap()
         .args([
-            "add-stdin",
+            "add",
+            "--stdin",
             "Unformatted 10:34 appointment",
         ])
         .assert()
