@@ -8,5 +8,6 @@ assert_cmd = "2.0.14"
 cargo-llvm-cov = "0.6.10"
 chrono = "0.4.38"
 clap = { version = "4.5.7", features = ["derive"] }
+colored = "2.1.0"
 dirs = "5.0.1"
 serial_test = "3.1.1"

@@ -4,7 +4,7 @@ use std::{
     path::PathBuf,
     str,
 };
-
+use colored::Colorize;
 use chrono::{Local, NaiveDate};
 
 extern crate dirs;
@@ -62,7 +62,7 @@ impl AppointmentTime {
     }
 
     pub fn is_past_from_now(&self) -> bool {
-        self <= &Self::now()
+        self < &Self::now()
     }
 
     pub fn from(time: &str) -> Result<Self, String> {
@@ -159,7 +159,12 @@ impl Appointment {
     }
 
     pub fn to_string_display(&self) -> String {
-        format!("[{}] {}", self.time, self.description)
+        let display = format!("[{}] {}", self.time, self.description);
+        if self.is_past_from_now() {
+            display.strikethrough().to_string()
+        } else {
+            display
+        }
     }
 }
 
@@ -411,6 +416,12 @@ mod tests {
     fn appointment_time_should_not_be_passed() {
         let future_appointment_time = AppointmentTime::now() - 5;
         assert!(future_appointment_time.is_past_from_now())
+    }
+
+    #[test]
+    fn appointment_time_should_not_be_passed_edge_case() {
+        let future_appointment_time = AppointmentTime::now();
+        assert!(!future_appointment_time.is_past_from_now())
     }
 
     #[test]
