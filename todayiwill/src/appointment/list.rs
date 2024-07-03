@@ -58,7 +58,7 @@ pub fn get_appointments_from_file(path: &PathBuf) -> Vec<Appointment> {
         Ok(content) => content,
         Err(..) => String::new(),
     };
-    let appointments: Vec<Result<Appointment, &str>> =
+    let appointments: Vec<Result<Appointment, String>> =
         file_content.lines().map(Appointment::from).collect();
     appointments.into_iter().flatten().collect()
 }

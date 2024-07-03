@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{ops::Add, path::PathBuf};
+use std::{ops::Add, path::PathBuf, str};
 
 use chrono::{Local, NaiveDate};
 
@@ -38,13 +38,13 @@ pub struct AppointmentTime {
     pub minutes: i32,
 }
 
-impl<'a> AppointmentTime {
-    pub fn new(hour: i32, minutes: i32) -> Result<Self, &'a str> {
+impl AppointmentTime {
+    pub fn new(hour: i32, minutes: i32) -> Result<Self, String> {
         if !(0..24).contains(&hour) {
-            return Err("Hour should be between 0 and 23");
+            return Err(String::from("Hour should be between 0 and 23"));
         }
         if !(0..60).contains(&minutes) {
-            return Err("Minutes should be between 0 and 59");
+            return Err(String::from("Minutes should be between 0 and 59"));
         }
         Ok(Self { hour, minutes })
     }
@@ -57,10 +57,10 @@ impl<'a> AppointmentTime {
         }
     }
 
-    pub fn from(time: &str) -> Result<Self, &'a str> {
+    pub fn from(time: &str) -> Result<Self, String> {
         let (hour, minutes) = match helper::parse_time(time) {
             Some((hour, minutes)) => (hour, minutes),
-            None => return Err("Invalid string for appointment time"),
+            None => return Err(String::from("Invalid string for appointment time")),
         };
         let appointment_time = Self::new(hour, minutes)?;
         Ok(appointment_time)
@@ -96,7 +96,15 @@ impl fmt::Display for AppointmentTime {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+impl str::FromStr for AppointmentTime {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        AppointmentTime::from(s)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Appointment {
     pub time: AppointmentTime,
     pub description: String,
@@ -107,7 +115,7 @@ impl Appointment {
         Self { description, time }
     }
 
-    pub fn from(appointment: &str) -> Result<Self, &str> {
+    pub fn from(appointment: &str) -> Result<Self, String>{
         let time: String = appointment.chars().take(5).collect();
         let appointment_time = AppointmentTime::from(&time)?;
         let description = appointment.chars().skip(6).collect();
@@ -118,6 +126,14 @@ impl Appointment {
 impl fmt::Display for Appointment {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.time, self.description)
+    }
+}
+
+impl str::FromStr for Appointment {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Appointment::from(s)
     }
 }
 
