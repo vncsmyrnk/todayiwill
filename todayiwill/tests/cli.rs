@@ -507,7 +507,6 @@ fn history_invalid_entries() {
 
 #[test]
 #[serial]
-#[ignore]
 fn add_from_stdin_should_be_possible() {
     common::setup();
 
@@ -538,12 +537,13 @@ fn add_from_stdin_should_be_possible() {
         .args(["list", "--current-time", "09:30"])
         .assert()
         .success()
-        .stdout("16:43 Read another chapter of moby dick\n20:46 Finish final assingment\n");
+        .stdout("16:23 Read another chapter of moby dick\n20:46 Finish final assingment\n");
+
+    common::remove_all_appointment_files();
 }
 
 #[test]
 #[serial]
-#[ignore]
 fn add_from_stdin_should_error_on_invalid_entries() {
     common::setup();
 
@@ -569,5 +569,5 @@ fn add_from_stdin_should_error_on_invalid_entries() {
         .assert()
         .failure()
         .code(2)
-        .stderr("error: invalid value '1204 A malformed appointment' for '--stdin <STDIN>': Invalid string for appointment time\n\nFor more information, try '--help'.\n");
+        .stderr("error: invalid value 'Unformatted 10:34 appointment' for '--stdin <STDIN>': Invalid string for appointment time\n\nFor more information, try '--help'.\n");
 }
