@@ -68,7 +68,7 @@ fn main() {
     match parse_result {
         Ok(..) => (),
         Err(error) => {
-            println!("{}", error);
+            eprintln!("{}", error);
             process::exit(1);
         }
     }

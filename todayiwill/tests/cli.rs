@@ -296,7 +296,7 @@ fn add_invalid_entries_for_current_time() {
         .assert()
         .failure()
         .code(1)
-        .stdout("Given time already passed.\n");
+        .stderr("Given time already passed.\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
@@ -312,7 +312,7 @@ fn add_invalid_entries_for_current_time() {
         .assert()
         .failure()
         .code(1)
-        .stdout("Given time already passed.\n");
+        .stderr("Given time already passed.\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
