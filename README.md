@@ -13,13 +13,31 @@ A CLI reminder app that offers a simple yet powerful solution to enhance product
 ## 🚀 Examples
 
 ```bash
+$ todayiwill
+A CLI for remembering what you need to do today
+
+Usage: todayiwill <COMMAND>
+
+Commands:
+  add      Add appointment for today
+  clear    Clear all the appointments added for today
+  list     List the appointments to come for today
+  history  List the appointments for other days
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+```
+
+```bash
 $ todayiwill add --description "Take my dog to the vet" --time "14:00"
 Appointment added successfully
 ```
 
 ```bash
 $ todayiwill list
-14:00 Take my dog to the vet
+[14:00] Take my dog to the vet
 ```
 ## 💽 Install
 
@@ -29,7 +47,7 @@ $ todayiwill list
 bash <(wget -O- https://github.com/vncsmyrnk/todayiwill/releases/latest/download/install-linux-debian.sh 2> /dev/null)
 ```
 
-## 🛠 Coming soon...
+## 🪄 Coming soon...
 
 Check the [opened issues](https://github.com/vncsmyrnk/todayiwill/issues) section to know what will soon be available.
 

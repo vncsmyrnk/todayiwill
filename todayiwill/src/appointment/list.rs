@@ -30,9 +30,7 @@ pub fn display_list(ref_time: Option<AppointmentTime>, expire_time: Option<i32>,
         return;
     }
     appointments.sort();
-    for appointment in &appointments {
-        println!("{}", appointment)
-    }
+    println!("{}", appointments_to_string_display(appointments));
 }
 
 /// Displays all appointments for specific dates
@@ -44,9 +42,16 @@ pub fn display_all_from(date: NaiveDate, config: Config) {
         return;
     }
     appointments.sort();
-    for appointment in &appointments {
-        println!("{}", appointment)
-    }
+    println!("{}", appointments_to_string_display(appointments));
+}
+
+/// Generate a printable string of a list of appointments
+pub fn appointments_to_string_display(appointments: Vec<Appointment>) -> String {
+    appointments
+        .into_iter()
+        .map(|a| a.to_string_display())
+        .collect::<Vec<String>>()
+        .join("\n")
 }
 
 /// Get the string version of the list of appointments
@@ -68,6 +73,8 @@ mod tests {
     use std::{fs, fs::File, io::Write, path::PathBuf};
 
     use crate::appointment::{list::get_appointments_from_file, Appointment, AppointmentTime};
+
+    use super::appointments_to_string_display;
 
     #[test]
     fn parse_file_contents() {
@@ -101,5 +108,24 @@ mod tests {
         let test_file_path = PathBuf::from("/tmp/non_existent.txt");
         let result = get_appointments_from_file(&test_file_path);
         assert_eq!(result, vec![]);
+    }
+
+    #[test]
+    fn appointments_should_be_displayed_properly() {
+        let appointments = vec![
+            Appointment::new(
+                String::from("Feed my pet fish"),
+                AppointmentTime::new(14, 30).unwrap(),
+            ),
+            Appointment::new(
+                String::from("Clean my bedroom"),
+                AppointmentTime::new(8, 50).unwrap(),
+            ),
+        ];
+        let display = appointments_to_string_display(appointments);
+        assert_eq!(
+            "[14:30] Feed my pet fish\n[08:50] Clean my bedroom",
+            display
+        );
     }
 }
