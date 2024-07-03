@@ -24,16 +24,20 @@ enum Commands {
     /// Add appointment for today
     Add {
         /// Appointment description
-        #[arg(short, long)]
-        description: String,
+        #[arg(short, long, required_unless_present("stdin"))]
+        description: Option<String>,
 
         /// Appointment time
-        #[arg(short, long)]
-        time: String,
+        #[arg(short, long, required_unless_present("stdin"))]
+        time: Option<String>,
 
         /// Current time, defaults to system time
         #[arg(short, long, value_parser=AppointmentTime::from, default_value_t=AppointmentTime::now())]
         current_time: AppointmentTime,
+
+        /// Parses an appointment as a string ["hh:mm appointment content"]
+        #[arg(long, required(false), exclusive(true))]
+        stdin: Option<String>,
     },
     /// Clear all the appointments added for today
     Clear,
@@ -68,8 +72,19 @@ fn main() {
             description,
             time,
             current_time,
+            stdin,
         } => {
-            let result = helper::parse_time(&time);
+            if stdin.is_some() {
+                let stdin_value = stdin.unwrap();
+                let _appointment = Appointment::from(&stdin_value);
+                println!("{stdin_value}");
+                return;
+           }
+
+            let description_value = description.expect("Description should be available here");
+            let time_value = time.expect("Description should be available here");
+
+            let result = helper::parse_time(&time_value);
             let (hour, minutes) = match result {
                 Some((hour, minutes)) => (hour, minutes),
                 None => {
@@ -91,7 +106,7 @@ fn main() {
                 process::exit(1)
             }
 
-            match add::add_appointment(Appointment::new(description, appointment_time), config) {
+            match add::add_appointment(Appointment::new(description_value, appointment_time), config) {
                 Ok(..) => (),
                 Err(error) => {
                     println!("An error occurred. {}", error);
