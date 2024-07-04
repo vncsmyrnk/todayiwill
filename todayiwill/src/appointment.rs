@@ -185,6 +185,7 @@ impl str::FromStr for Appointment {
 #[cfg(test)]
 mod tests {
     use chrono::{Local, NaiveDate};
+    use colored::Colorize;
 
     use crate::Appointment;
 
@@ -399,11 +400,22 @@ mod tests {
 
     #[test]
     fn display_appointment() {
+        let future_time = AppointmentTime::now() + 1;
         let appointment = Appointment::new(
             String::from("Go to the dentist"),
-            AppointmentTime::new(10, 40).unwrap(),
+            future_time.clone()
         );
-        assert_eq!("[10:40] Go to the dentist", appointment.to_string_display());
+        assert_eq!(format!("[{future_time}] Go to the dentist"), appointment.to_string_display());
+    }
+
+    #[test]
+    fn display_past_appointment() {
+        let past_time = AppointmentTime::now() - 1;
+        let appointment = Appointment::new(
+            String::from("Do the laundry"),
+            past_time.clone()
+        );
+        assert_eq!(format!("[{past_time}] Do the laundry").strikethrough().to_string(), appointment.to_string_display());
     }
 
     #[test]
