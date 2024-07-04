@@ -6,17 +6,24 @@ use clap::{Parser, Subcommand};
 extern crate chrono;
 extern crate dirs;
 
-mod appointment;
-
-use appointment::{add, clear, helper, list, Appointment, AppointmentTime, Config};
+use colored::Colorize;
+use todayiwill::appointment::{
+    helper::{self, Config},
+    list::{AppointmentList, ListOptions},
+    Appointment, AppointmentTime,
+};
 
 /// A CLI for remembering what you need to do today
 #[derive(Debug, Parser)]
 #[command(name = "todayiwill")]
-#[command(version, about = "A CLI for remembering what you need to do today", long_about = None)]
+#[command(version, about = format!("A CLI for remembering what you need to do today.\nCheckout the project on {} for submitting requests and rating the app.", "https://github.com/vncsmyrnk/todayiwill".underline()))]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
+
+    /// Current time, defaults to system time
+    #[arg(short, long, global=true, default_value_t=AppointmentTime::now())]
+    current_time: AppointmentTime,
 }
 
 #[derive(Debug, Subcommand)]
@@ -31,10 +38,6 @@ enum Commands {
         #[arg(short, long, required_unless_present("stdin"))]
         time: Option<AppointmentTime>,
 
-        /// Current time, defaults to system time
-        #[arg(short, long, default_value_t=AppointmentTime::now())]
-        current_time: AppointmentTime,
-
         /// Parses an appointment as a string ("hh:mm appointment content")
         #[arg(long, required(false), exclusive(true))]
         stdin: Option<Appointment>,
@@ -43,13 +46,9 @@ enum Commands {
     Clear,
     /// List the appointments to come for today
     List {
-        /// Current time, defaults to system time
-        #[arg(short, long, value_parser=AppointmentTime::from, default_value_t=AppointmentTime::now())]
-        current_time: AppointmentTime,
-
         /// Show appointments which will expire in X seconds
-        #[arg(short, long, default_value_t=-1)]
-        expire_in: i32,
+        #[arg(short, long)]
+        expire_in: Option<i32>,
 
         /// If informed, all appointments are retrieved
         #[arg(short, long, default_value_t = false)]
@@ -78,16 +77,21 @@ fn parse_input() -> Result<(), String> {
     let config = Config::standard();
     let args = Cli::parse();
 
+    let current_time = args.current_time;
+
     match args.command {
         Commands::Add {
             description,
             time,
-            current_time,
             stdin,
         } => {
+            let mut list = create_list_for_current_day(&current_time, &config);
+
             if stdin.is_some() {
                 let appointment = stdin.unwrap();
-                return add_appointment(appointment);
+                list.add(appointment, &config.appointment_file_path_current_day)?;
+                println!("Appointment added successfully.");
+                return Ok(());
             }
 
             let appointment_description =
@@ -98,33 +102,55 @@ fn parse_input() -> Result<(), String> {
                 return Err(String::from("Given time already passed."));
             }
 
-            add_appointment(Appointment::new(appointment_description, appointment_time))?;
+            list.add(
+                Appointment::new(appointment_description, appointment_time),
+                &config.appointment_file_path_current_day,
+            )?;
+            println!("Appointment added successfully.");
         }
-        Commands::List {
-            current_time,
-            expire_in,
-            all,
-        } => {
-            let ref_time = match all {
-                true => None,
-                _ => Some(current_time),
-            };
-            let ref_expiration = match expire_in {
-                -1 => None,
-                other => Some(other),
-            };
-            list::display_list(ref_time, ref_expiration, config);
+        Commands::List { expire_in, all } => {
+            let mut list = create_list_for_current_day(&current_time, &config);
+
+            if list.no_appointments() {
+                println!("There are no appointments added for today.");
+                return Ok(());
+            }
+
+            if !all {
+                match expire_in {
+                    None => list.filter(ListOptions::ByReferenceTime),
+                    Some(value) => list.filter(ListOptions::ByReferenceAndExpireTime(value)),
+                };
+            }
+
+            if list.no_appointments() {
+                println!("No appointments found.")
+            } else {
+                println!("{list}")
+            }
         }
-        Commands::Clear => clear::clear_appointments(config),
-        Commands::History { date } => list::display_all_from(date, config),
+        Commands::Clear => {
+            let mut list = create_list_for_current_day(&current_time, &config);
+            list.clear(&config.appointment_file_path_current_day)?;
+            println!("Appointments cleared successfully.");
+            return Ok(());
+        }
+        Commands::History { date } => {
+            let list = AppointmentList::from_path(
+                &current_time,
+                &(config.appointment_file_path_builder)(date),
+            );
+            if list.no_appointments() {
+                println!("There were no appointments added in this day.")
+            } else {
+                println!("{list}")
+            }
+        }
     }
 
     Ok(())
 }
 
-fn add_appointment(appointment: Appointment) -> Result<(), String> {
-    match add::add_appointment(appointment, Config::standard()) {
-        Ok(..) => Ok(()),
-        Err(error) => Err(format!("Error while saving appointment: {}", error)),
-    }
+fn create_list_for_current_day(current_time: &AppointmentTime, config: &Config) -> AppointmentList {
+    AppointmentList::from_path(current_time, &config.appointment_file_path_current_day)
 }

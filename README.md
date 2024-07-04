@@ -12,11 +12,16 @@ A CLI reminder app that offers a simple yet powerful solution to enhance product
 
 ## 🚀 Examples
 
+### Documentation
+
 ```bash
 $ todayiwill
-A CLI for remembering what you need to do today
+```
+```
+A CLI for remembering what you need to do today.
+Checkout the project on https://github.com/vncsmyrnk/todayiwill for submitting requests and rating the app.
 
-Usage: todayiwill <COMMAND>
+Usage: todayiwill [OPTIONS] <COMMAND>
 
 Commands:
   add      Add appointment for today
@@ -26,17 +31,24 @@ Commands:
   help     Print this message or the help of the given subcommand(s)
 
 Options:
-  -h, --help     Print help
-  -V, --version  Print version
+  -c, --current-time <CURRENT_TIME>  Current time, defaults to system time [default: 18:29]
+  -h, --help                         Print help
+  -V, --version                      Print version
 ```
+### Add appointments
 
 ```bash
 $ todayiwill add --description "Take my dog to the vet" --time "14:00"
+```
+```
 Appointment added successfully
 ```
+### List appointments
 
 ```bash
 $ todayiwill list
+```
+```
 [14:00] Take my dog to the vet
 ```
 ## 💽 Install

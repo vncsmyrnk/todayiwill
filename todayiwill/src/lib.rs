@@ -1,3 +1,3 @@
 pub mod appointment;
 
-pub use appointment::{Appointment, AppointmentTime};
+pub use appointment::{list::AppointmentList, Appointment, AppointmentTime};
