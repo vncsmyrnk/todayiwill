@@ -8,8 +8,6 @@ use std::{
 
 extern crate dirs;
 
-pub mod add;
-pub mod clear;
 pub mod helper;
 pub mod list;
 

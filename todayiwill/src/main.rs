@@ -9,7 +9,7 @@ extern crate dirs;
 mod appointment;
 
 use appointment::{
-    add, clear, helper,
+    helper,
     list::{AppointmentList, ListOptions},
     Appointment, AppointmentTime, Config,
 };
@@ -86,9 +86,13 @@ fn parse_input() -> Result<(), String> {
             time,
             stdin,
         } => {
+            let mut list = create_list_for_current_day(&current_time, &config);
+
             if stdin.is_some() {
                 let appointment = stdin.unwrap();
-                return add_appointment(appointment);
+                list.add(appointment, &config.appointment_file_path_current_day)?;
+                println!("Appointment added successfully.");
+                return Ok(());
             }
 
             let appointment_description =
@@ -99,11 +103,15 @@ fn parse_input() -> Result<(), String> {
                 return Err(String::from("Given time already passed."));
             }
 
-            add_appointment(Appointment::new(appointment_description, appointment_time))?;
+            list.add(
+                Appointment::new(appointment_description, appointment_time),
+                &config.appointment_file_path_current_day,
+            )?;
+            println!("Appointment added successfully.");
         }
         Commands::List { expire_in, all } => {
-            let mut list =
-                AppointmentList::from_path(current_time, &config.appointment_file_path_current_day);
+            let mut list = create_list_for_current_day(&current_time, &config);
+
             if list.no_appointments() {
                 println!("There are no appointments added for today.");
                 return Ok(());
@@ -122,10 +130,15 @@ fn parse_input() -> Result<(), String> {
                 println!("{list}")
             }
         }
-        Commands::Clear => clear::clear_appointments(config),
+        Commands::Clear => {
+            let mut list = create_list_for_current_day(&current_time, &config);
+            list.clear(&config.appointment_file_path_current_day)?;
+            println!("Appointments cleared successfully.");
+            return Ok(());
+        }
         Commands::History { date } => {
             let list = AppointmentList::from_path(
-                current_time,
+                &current_time,
                 &(config.appointment_file_path_builder)(date),
             );
             if list.no_appointments() {
@@ -139,9 +152,6 @@ fn parse_input() -> Result<(), String> {
     Ok(())
 }
 
-fn add_appointment(appointment: Appointment) -> Result<(), String> {
-    match add::add_appointment(appointment, Config::standard()) {
-        Ok(..) => Ok(()),
-        Err(error) => Err(format!("Error while saving appointment: {}", error)),
-    }
+fn create_list_for_current_day(current_time: &AppointmentTime, config: &Config) -> AppointmentList {
+    AppointmentList::from_path(current_time, &config.appointment_file_path_current_day)
 }
