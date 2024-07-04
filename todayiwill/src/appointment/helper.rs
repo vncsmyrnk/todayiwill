@@ -1,4 +1,29 @@
-use chrono::{NaiveDate, ParseError};
+use chrono::{Local, NaiveDate, ParseError};
+use std::path::PathBuf;
+
+use super::helper;
+
+pub struct Config {
+    pub appointment_file_path_current_day: Box<PathBuf>,
+    pub appointment_file_path_builder: Box<dyn Fn(NaiveDate) -> PathBuf>,
+}
+
+impl Config {
+    pub fn standard() -> Self {
+        let appointment_path_builder = |date: NaiveDate| {
+            dirs::data_dir()
+                .unwrap()
+                .join("todayiwill")
+                .join(format!("appointments_{}.txt", helper::date_code(date)))
+        };
+        Self {
+            appointment_file_path_current_day: Box::new(appointment_path_builder(
+                Local::now().date_naive(),
+            )),
+            appointment_file_path_builder: Box::new(appointment_path_builder),
+        }
+    }
+}
 
 /// Parses string time (hours and minutes) and returns a tuple with both values
 /// `10:43` -> Option<(10, 43)>
@@ -24,7 +49,7 @@ pub fn str_dmy_to_naive_date(date: &str) -> Result<NaiveDate, ParseError> {
 mod tests {
     use chrono::NaiveDate;
 
-    use super::{date_code, parse_time, str_dmy_to_naive_date};
+    use super::{date_code, parse_time, str_dmy_to_naive_date, Config};
 
     #[test]
     fn parse_wellformed_time() {
@@ -63,5 +88,19 @@ mod tests {
     fn malformed_date_naive_parse_edge_case() {
         let result = str_dmy_to_naive_date("2020-01-23");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn config_default_should_return_a_builder_fn() {
+        let result = (Config::standard().appointment_file_path_builder)(
+            NaiveDate::from_ymd_opt(2023, 10, 21).unwrap(),
+        );
+        assert_eq!(
+            result,
+            dirs::data_dir()
+                .unwrap()
+                .join("todayiwill")
+                .join("appointments_21102023.txt")
+        );
     }
 }

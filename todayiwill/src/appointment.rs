@@ -1,8 +1,7 @@
-use chrono::{Local, NaiveDate};
+use chrono::Local;
 use core::fmt;
 use std::{
     ops::{Add, Sub},
-    path::PathBuf,
     str,
 };
 
@@ -10,28 +9,6 @@ extern crate dirs;
 
 pub mod helper;
 pub mod list;
-
-pub struct Config {
-    pub appointment_file_path_current_day: Box<PathBuf>,
-    pub appointment_file_path_builder: Box<dyn Fn(NaiveDate) -> PathBuf>,
-}
-
-impl Config {
-    pub fn standard() -> Self {
-        let appointment_path_builder = |date: NaiveDate| {
-            dirs::data_dir()
-                .unwrap()
-                .join("todayiwill")
-                .join(format!("appointments_{}.txt", helper::date_code(date)))
-        };
-        Self {
-            appointment_file_path_current_day: Box::new(appointment_path_builder(
-                Local::now().date_naive(),
-            )),
-            appointment_file_path_builder: Box::new(appointment_path_builder),
-        }
-    }
-}
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AppointmentTime {
@@ -182,11 +159,8 @@ impl str::FromStr for Appointment {
 
 #[cfg(test)]
 mod tests {
-    use chrono::{Local, NaiveDate};
-
-    use crate::Appointment;
-
-    use super::{AppointmentTime, Config};
+    use super::{Appointment, AppointmentTime};
+    use chrono::Local;
 
     #[test]
     fn wellformed_appointment_time() {
@@ -379,20 +353,6 @@ mod tests {
         let result = Appointment::from("24:00 An impossible appointment");
         let err = result.err();
         assert_eq!("Hour should be between 0 and 23", err.unwrap());
-    }
-
-    #[test]
-    fn config_default_should_return_a_builder_fn() {
-        let result = (Config::standard().appointment_file_path_builder)(
-            NaiveDate::from_ymd_opt(2023, 10, 21).unwrap(),
-        );
-        assert_eq!(
-            result,
-            dirs::data_dir()
-                .unwrap()
-                .join("todayiwill")
-                .join("appointments_21102023.txt")
-        );
     }
 
     #[test]

@@ -101,7 +101,7 @@ impl AppointmentList {
     #[allow(dead_code)]
     pub fn clear(&mut self, path: &PathBuf) -> Result<(), String> {
         self.appointments = vec![];
-        match fs::remove_file(&path) {
+        match fs::remove_file(path) {
             Ok(..) => Ok(()),
             Err(error) => Err(format!(
                 "An error occurred when clearing the appointments. {}",

@@ -9,9 +9,9 @@ extern crate dirs;
 mod appointment;
 
 use appointment::{
-    helper,
+    helper::{self, Config},
     list::{AppointmentList, ListOptions},
-    Appointment, AppointmentTime, Config,
+    Appointment, AppointmentTime,
 };
 
 /// A CLI for remembering what you need to do today
