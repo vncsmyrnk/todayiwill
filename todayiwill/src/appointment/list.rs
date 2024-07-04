@@ -94,7 +94,10 @@ impl fmt::Display for AppointmentList {
 mod tests {
     use std::{fs, fs::File, io::Write, path::PathBuf};
 
-    use crate::appointment::{list::AppointmentList, Appointment, AppointmentTime};
+    use crate::appointment::{
+        list::{AppointmentList, ListOptions},
+        Appointment, AppointmentTime,
+    };
 
     #[test]
     fn parse_file_contents() {
@@ -145,10 +148,39 @@ mod tests {
                 AppointmentTime::new(8, 50).unwrap(),
             ),
         ];
-        let display = AppointmentList::from_appointments(AppointmentTime::now(), appointments);
+        let list = AppointmentList::from_appointments(AppointmentTime::now(), appointments);
         assert_eq!(
             "[14:30] Feed my pet fish\n[08:50] Clean my bedroom",
-            display.to_string()
+            list.to_string()
+        );
+    }
+
+    #[test]
+    fn filter_should_retain_by_time() {
+        let appointments = vec![
+            Appointment::new(
+                String::from("Close the windows"),
+                AppointmentTime::new(6, 20).unwrap(),
+            ),
+            Appointment::new(
+                String::from("Feed the dog"),
+                AppointmentTime::new(7, 25).unwrap(),
+            ),
+            Appointment::new(
+                String::from("Check the news"),
+                AppointmentTime::new(8, 0).unwrap(),
+            ),
+        ];
+        let mut list = AppointmentList::from_appointments(
+            AppointmentTime::new(7, 34).unwrap(),
+            appointments.to_vec(),
+        );
+        assert_eq!(
+            vec![Appointment::new(
+                String::from("Check the news"),
+                AppointmentTime::new(8, 0).unwrap(),
+            ),],
+            list.filter(ListOptions::ByReferenceTime).appointments()
         );
     }
 }
