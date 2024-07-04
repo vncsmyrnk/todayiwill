@@ -35,12 +35,13 @@ impl AppointmentList {
 
     #[allow(dead_code)]
     pub fn from_appointments(
-        reference_time: AppointmentTime,
-        appointments: Vec<Appointment>,
+        reference_time: &AppointmentTime,
+        mut appointments: Vec<Appointment>,
     ) -> Self {
+        appointments.sort();
         Self {
             appointments,
-            reference_time,
+            reference_time: reference_time.clone(),
         }
     }
 
@@ -98,7 +99,6 @@ impl AppointmentList {
         self
     }
 
-    #[allow(dead_code)]
     pub fn clear(&mut self, path: &PathBuf) -> Result<(), String> {
         self.appointments = vec![];
         match fs::remove_file(path) {
@@ -143,6 +143,8 @@ mod tests {
         Appointment, AppointmentTime,
     };
 
+    use colored::Colorize;
+
     #[test]
     fn parse_file_contents() {
         let test_file_path = PathBuf::from("/tmp")
@@ -154,7 +156,8 @@ mod tests {
         file.write_all(b"22:00 Go to night shift\n12:45 Visit grandma\n212 Nonsense")
             .expect("Failed to write to test file");
 
-        let list = AppointmentList::from_path(&AppointmentTime::now(), &test_file_path);
+        let list =
+            AppointmentList::from_path(&AppointmentTime::new(11, 58).unwrap(), &test_file_path);
         let result = list.appointments();
         assert_eq!(
             result,
@@ -192,9 +195,10 @@ mod tests {
                 AppointmentTime::new(8, 50).unwrap(),
             ),
         ];
-        let list = AppointmentList::from_appointments(AppointmentTime::now(), appointments);
+        let list =
+            AppointmentList::from_appointments(&AppointmentTime::new(7, 29).unwrap(), appointments);
         assert_eq!(
-            "[14:30] Feed my pet fish\n[08:50] Clean my bedroom",
+            "[08:50] Clean my bedroom\n[14:30] Feed my pet fish",
             list.to_string()
         );
     }
@@ -216,7 +220,7 @@ mod tests {
             ),
         ];
         let mut list = AppointmentList::from_appointments(
-            AppointmentTime::new(7, 34).unwrap(),
+            &AppointmentTime::new(7, 34).unwrap(),
             appointments.to_vec(),
         );
         assert_eq!(
@@ -249,7 +253,8 @@ mod tests {
                 AppointmentTime::new(16, 56).unwrap(),
             ),
         ];
-        let list = AppointmentList::from_appointments(AppointmentTime::now(), appointments);
+        let list =
+            AppointmentList::from_appointments(&AppointmentTime::new(3, 10).unwrap(), appointments);
         list.write(&path)
             .expect("Failed to write appointments on file");
         let file_result = fs::read_to_string(&path).expect("Failed to read file content");
@@ -264,7 +269,7 @@ mod tests {
         fs::create_dir_all(path.parent().unwrap().to_str().unwrap())
             .expect("Failed to create data dir");
         let mut list = AppointmentList::from_appointments(
-            AppointmentTime::now(),
+            &AppointmentTime::new(6, 43).unwrap(),
             vec![
                 Appointment::new(
                     String::from("Go to the bank"),
@@ -305,8 +310,56 @@ mod tests {
         file.write_all(b"12:54 A random appointment\n")
             .expect("Failed to write to test file");
         assert!(path.exists());
-        let mut list = AppointmentList::from_path(&AppointmentTime::now(), &path);
+        let mut list = AppointmentList::from_path(&AppointmentTime::new(22, 4).unwrap(), &path);
         list.clear(&path).expect("Failed to remove file");
         assert!(!path.exists());
+    }
+
+    #[test]
+    fn past_appointments_should_be_strikethrough() {
+        let reference_time = AppointmentTime::new(14, 38).unwrap();
+        let list = AppointmentList::from_appointments(
+            &reference_time,
+            vec![
+                Appointment::new(
+                    String::from("Make restaurant reservations"),
+                    AppointmentTime::new(9, 47).unwrap(),
+                ),
+                Appointment::new(
+                    String::from("Update my professional portfolio"),
+                    AppointmentTime::new(19, 17).unwrap(),
+                ),
+                Appointment::new(
+                    String::from("Backup the vacation pictures"),
+                    AppointmentTime::new(12, 51).unwrap(),
+                ),
+                Appointment::new(
+                    String::from("Buy new sunglasses"),
+                    AppointmentTime::new(16, 8).unwrap(),
+                ),
+                Appointment::new(
+                    String::from("Play fifa"),
+                    AppointmentTime::new(14, 38).unwrap(),
+                ),
+                Appointment::new(String::from("Rest"), AppointmentTime::new(14, 39).unwrap()),
+            ],
+        );
+
+        assert_eq!(
+            format!(
+                "{}\n{}\n{}\n{}\n{}\n{}",
+                "[09:47] Make restaurant reservations"
+                    .strikethrough()
+                    .to_string(),
+                "[12:51] Backup the vacation pictures"
+                    .strikethrough()
+                    .to_string(),
+                "[14:38] Play fifa".strikethrough().to_string(),
+                "[14:39] Rest",
+                "[16:08] Buy new sunglasses",
+                "[19:17] Update my professional portfolio"
+            ),
+            list.to_string()
+        );
     }
 }

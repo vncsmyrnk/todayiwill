@@ -1,4 +1,5 @@
 use chrono::Local;
+use colored::Colorize;
 use core::fmt;
 use std::{
     ops::{Add, Sub},
@@ -35,8 +36,8 @@ impl AppointmentTime {
         }
     }
 
-    pub fn is_past_from(&self, appointment_time: &AppointmentTime) -> bool {
-        self < appointment_time
+    pub fn is_equal_or_past_from(&self, appointment_time: &AppointmentTime) -> bool {
+        self <= appointment_time
     }
 
     pub fn from(time: &str) -> Result<Self, String> {
@@ -128,15 +129,14 @@ impl Appointment {
         Ok(Appointment::new(description, appointment_time))
     }
 
-    pub fn is_past_from(&self, appointment_time: &AppointmentTime) -> bool {
-        self.time.is_past_from(appointment_time)
+    pub fn is_equal_or_past_from(&self, appointment_time: &AppointmentTime) -> bool {
+        self.time.is_equal_or_past_from(appointment_time)
     }
 
     pub fn to_string_display(&self, ref_time: &AppointmentTime) -> String {
         let display = format!("[{}] {}", self.time, self.description);
-        if self.is_past_from(ref_time) {
-            // display.strikethrough().to_string()
-            display
+        if self.is_equal_or_past_from(ref_time) {
+            display.strikethrough().to_string()
         } else {
             display
         }
@@ -161,6 +161,7 @@ impl str::FromStr for Appointment {
 mod tests {
     use super::{Appointment, AppointmentTime};
     use chrono::Local;
+    use colored::Colorize;
 
     #[test]
     fn wellformed_appointment_time() {
@@ -369,14 +370,55 @@ mod tests {
     }
 
     #[test]
+    fn display_appointment_edge_case() {
+        let appointment = Appointment::new(
+            String::from("Study for test tomorrow"),
+            AppointmentTime::new(12, 4).unwrap(),
+        );
+        let ref_time = AppointmentTime::new(12, 5).unwrap();
+        assert_eq!(
+            "[12:04] Study for test tomorrow"
+                .strikethrough()
+                .to_string(),
+            appointment.to_string_display(&ref_time)
+        );
+    }
+
+    #[test]
+    fn display_appointment_edge_case_complement() {
+        let appointment = Appointment::new(
+            String::from("Go to gym"),
+            AppointmentTime::new(5, 30).unwrap(),
+        );
+        let ref_time = AppointmentTime::new(5, 30).unwrap();
+        assert_eq!(
+            "[05:30] Go to gym".strikethrough().to_string(),
+            appointment.to_string_display(&ref_time)
+        );
+    }
+
+    #[test]
     fn display_past_appointment() {
         let appointment = Appointment::new(
             String::from("Do the laundry"),
-            AppointmentTime::new(18, 5).unwrap(),
+            AppointmentTime::new(18, 0).unwrap(),
         );
-        let ref_time = AppointmentTime::new(18, 0).unwrap();
+        let ref_time = AppointmentTime::new(18, 5).unwrap();
         assert_eq!(
-            "[18:05] Do the laundry",
+            "[18:00] Do the laundry".strikethrough().to_string(),
+            appointment.to_string_display(&ref_time)
+        );
+    }
+
+    #[test]
+    fn display_past_appointment_edge_case() {
+        let appointment = Appointment::new(
+            String::from("Make dinner"),
+            AppointmentTime::new(20, 5).unwrap(),
+        );
+        let ref_time = AppointmentTime::new(20, 5).unwrap();
+        assert_eq!(
+            "[20:05] Make dinner".strikethrough().to_string(),
             appointment.to_string_display(&ref_time)
         );
     }
@@ -384,19 +426,19 @@ mod tests {
     #[test]
     fn appointment_time_should_be_passed() {
         let future_appointment_time = AppointmentTime::now() + 5;
-        assert!(!future_appointment_time.is_past_from(&AppointmentTime::now()))
+        assert!(!future_appointment_time.is_equal_or_past_from(&AppointmentTime::now()))
     }
 
     #[test]
     fn appointment_time_should_not_be_passed() {
         let future_appointment_time = AppointmentTime::now() - 5;
-        assert!(future_appointment_time.is_past_from(&AppointmentTime::now()))
+        assert!(future_appointment_time.is_equal_or_past_from(&AppointmentTime::now()))
     }
 
     #[test]
-    fn appointment_time_should_not_be_passed_edge_case() {
+    fn appointment_time_should_be_passed_edge_case() {
         let future_appointment_time = AppointmentTime::now();
-        assert!(!future_appointment_time.is_past_from(&AppointmentTime::now()))
+        assert!(future_appointment_time.is_equal_or_past_from(&AppointmentTime::now()))
     }
 
     #[test]
@@ -405,7 +447,7 @@ mod tests {
             String::from("Some future appointment"),
             AppointmentTime::now() + 5,
         );
-        assert!(!future_appointment.is_past_from(&AppointmentTime::now()))
+        assert!(!future_appointment.is_equal_or_past_from(&AppointmentTime::now()))
     }
 
     #[test]
@@ -414,6 +456,6 @@ mod tests {
             String::from("Some past appointment"),
             AppointmentTime::now() - 5,
         );
-        assert!(future_appointment.is_past_from(&AppointmentTime::now()))
+        assert!(future_appointment.is_equal_or_past_from(&AppointmentTime::now()))
     }
 }
