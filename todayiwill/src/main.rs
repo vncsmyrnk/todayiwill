@@ -6,6 +6,7 @@ use clap::{Parser, Subcommand};
 extern crate chrono;
 extern crate dirs;
 
+use colored::Colorize;
 use todayiwill::appointment::{
     helper::{self, Config},
     list::{AppointmentList, ListOptions},
@@ -15,7 +16,7 @@ use todayiwill::appointment::{
 /// A CLI for remembering what you need to do today
 #[derive(Debug, Parser)]
 #[command(name = "todayiwill")]
-#[command(version, about = "A CLI for remembering what you need to do today", long_about = None)]
+#[command(version, about = format!("A CLI for remembering what you need to do today.\nCheckout the project on {} for submitting requests and rating the app.", "https://github.com/vncsmyrnk/todayiwill".underline()))]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
