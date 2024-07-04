@@ -6,9 +6,7 @@ use clap::{Parser, Subcommand};
 extern crate chrono;
 extern crate dirs;
 
-mod appointment;
-
-use appointment::{
+use todayiwill::appointment::{
     helper::{self, Config},
     list::{AppointmentList, ListOptions},
     Appointment, AppointmentTime,
