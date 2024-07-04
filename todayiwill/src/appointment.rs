@@ -1,11 +1,10 @@
+use chrono::{Local, NaiveDate};
 use core::fmt;
 use std::{
     ops::{Add, Sub},
     path::PathBuf,
     str,
 };
-use colored::Colorize;
-use chrono::{Local, NaiveDate};
 
 extern crate dirs;
 
@@ -61,8 +60,8 @@ impl AppointmentTime {
         }
     }
 
-    pub fn is_past_from_now(&self) -> bool {
-        self < &Self::now()
+    pub fn is_past_from(&self, appointment_time: &AppointmentTime) -> bool {
+        self < appointment_time
     }
 
     pub fn from(time: &str) -> Result<Self, String> {
@@ -154,14 +153,15 @@ impl Appointment {
         Ok(Appointment::new(description, appointment_time))
     }
 
-    pub fn is_past_from_now(&self) -> bool {
-        self.time.is_past_from_now()
+    pub fn is_past_from(&self, appointment_time: &AppointmentTime) -> bool {
+        self.time.is_past_from(appointment_time)
     }
 
-    pub fn to_string_display(&self) -> String {
+    pub fn to_string_display(&self, ref_time: &AppointmentTime) -> String {
         let display = format!("[{}] {}", self.time, self.description);
-        if self.is_past_from_now() {
-            display.strikethrough().to_string()
+        if self.is_past_from(ref_time) {
+            // display.strikethrough().to_string()
+            display
         } else {
             display
         }
@@ -185,7 +185,6 @@ impl str::FromStr for Appointment {
 #[cfg(test)]
 mod tests {
     use chrono::{Local, NaiveDate};
-    use colored::Colorize;
 
     use crate::Appointment;
 
@@ -400,40 +399,46 @@ mod tests {
 
     #[test]
     fn display_appointment() {
-        let future_time = AppointmentTime::now() + 1;
         let appointment = Appointment::new(
             String::from("Go to the dentist"),
-            future_time.clone()
+            AppointmentTime::new(2, 30).unwrap(),
         );
-        assert_eq!(format!("[{future_time}] Go to the dentist"), appointment.to_string_display());
+        let ref_time = AppointmentTime::new(1, 0).unwrap();
+        assert_eq!(
+            "[02:30] Go to the dentist",
+            appointment.to_string_display(&ref_time)
+        );
     }
 
     #[test]
     fn display_past_appointment() {
-        let past_time = AppointmentTime::now() - 1;
         let appointment = Appointment::new(
             String::from("Do the laundry"),
-            past_time.clone()
+            AppointmentTime::new(18, 5).unwrap(),
         );
-        assert_eq!(format!("[{past_time}] Do the laundry").strikethrough().to_string(), appointment.to_string_display());
+        let ref_time = AppointmentTime::new(18, 0).unwrap();
+        assert_eq!(
+            "[18:05] Do the laundry",
+            appointment.to_string_display(&ref_time)
+        );
     }
 
     #[test]
     fn appointment_time_should_be_passed() {
         let future_appointment_time = AppointmentTime::now() + 5;
-        assert!(!future_appointment_time.is_past_from_now())
+        assert!(!future_appointment_time.is_past_from(&AppointmentTime::now()))
     }
 
     #[test]
     fn appointment_time_should_not_be_passed() {
         let future_appointment_time = AppointmentTime::now() - 5;
-        assert!(future_appointment_time.is_past_from_now())
+        assert!(future_appointment_time.is_past_from(&AppointmentTime::now()))
     }
 
     #[test]
     fn appointment_time_should_not_be_passed_edge_case() {
         let future_appointment_time = AppointmentTime::now();
-        assert!(!future_appointment_time.is_past_from_now())
+        assert!(!future_appointment_time.is_past_from(&AppointmentTime::now()))
     }
 
     #[test]
@@ -442,7 +447,7 @@ mod tests {
             String::from("Some future appointment"),
             AppointmentTime::now() + 5,
         );
-        assert!(!future_appointment.is_past_from_now())
+        assert!(!future_appointment.is_past_from(&AppointmentTime::now()))
     }
 
     #[test]
@@ -451,6 +456,6 @@ mod tests {
             String::from("Some past appointment"),
             AppointmentTime::now() - 5,
         );
-        assert!(future_appointment.is_past_from_now())
+        assert!(future_appointment.is_past_from(&AppointmentTime::now()))
     }
 }

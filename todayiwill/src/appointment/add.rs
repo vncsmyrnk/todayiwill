@@ -4,12 +4,15 @@ use std::{
     path::PathBuf,
 };
 
-use super::{list, Appointment, Config};
+use super::{list::AppointmentList, Appointment, AppointmentTime, Config};
 
 /// Adds a new appointment to the list stored in files
 pub fn add_appointment(appointment: Appointment, config: Config) -> Result<(), io::Error> {
-    let mut appointments =
-        list::get_appointments_from_file(&config.appointment_file_path_current_day);
+    let mut appointments = AppointmentList::from_path(
+        AppointmentTime::now(),
+        &config.appointment_file_path_current_day,
+    )
+    .appointments();
     appointments.push(appointment);
     appointments.sort();
     write_appointments_to_file(appointments, &config.appointment_file_path_current_day)?;

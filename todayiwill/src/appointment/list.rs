@@ -1,80 +1,100 @@
+use core::fmt;
 use std::{fs, path::PathBuf};
-
-use chrono::NaiveDate;
 
 use crate::appointment::AppointmentTime;
 
-use super::{Appointment, Config};
+use super::Appointment;
 
-/// Displays the list of appointments in the standard output
-pub fn display_list(ref_time: Option<AppointmentTime>, expire_time: Option<i32>, config: Config) {
-    let mut appointments = get_appointments_from_file(&config.appointment_file_path_current_day);
-    if appointments.is_empty() {
-        println!("There are no appointments added for today.");
-        return;
+pub enum ListOptions {
+    ByReferenceTime,
+    ByReferenceAndExpireTime(i32),
+}
+
+pub struct AppointmentList {
+    reference_time: AppointmentTime,
+    appointments: Vec<Appointment>,
+}
+
+impl AppointmentList {
+    pub fn new(reference_time: AppointmentTime) -> Self {
+        Self {
+            appointments: vec![],
+            reference_time,
+        }
     }
-    if ref_time.is_some() {
-        let lower_limit = ref_time.unwrap();
-        let upper_limit = match expire_time {
-            Some(value) => lower_limit.clone() + value,
-            None => AppointmentTime::max_value(),
+
+    pub fn from_path(reference_time: AppointmentTime, path: &PathBuf) -> Self {
+        let mut new_list = Self::new(reference_time);
+        new_list.load(path);
+        new_list
+    }
+
+    #[allow(dead_code)]
+    pub fn from_appointments(
+        reference_time: AppointmentTime,
+        appointments: Vec<Appointment>,
+    ) -> Self {
+        Self {
+            appointments,
+            reference_time,
+        }
+    }
+
+    pub fn appointments(&self) -> Vec<Appointment> {
+        self.appointments.clone()
+    }
+
+    pub fn no_appointments(&self) -> bool {
+        self.appointments.is_empty()
+    }
+
+    pub fn load(&mut self, path: &PathBuf) -> &Self {
+        let file_result = fs::read_to_string(path);
+        let file_content = match file_result {
+            Ok(content) => content,
+            Err(..) => String::new(),
         };
-        appointments = appointments
-            .into_iter()
-            .filter(|a| a.time > lower_limit)
-            .filter(|a| a.time <= upper_limit)
-            .collect();
+        let appointments: Vec<Result<Appointment, String>> =
+            file_content.lines().map(Appointment::from).collect();
+        self.appointments = appointments.into_iter().flatten().collect();
+        self.appointments.sort();
+        self
     }
-    if appointments.is_empty() {
-        println!("No appointments found.");
-        return;
+
+    pub fn filter(&mut self, options: ListOptions) -> &Self {
+        let filter_by_reference_time = |a: &Appointment| a.time > self.reference_time;
+        match options {
+            ListOptions::ByReferenceTime => {
+                self.appointments.retain(filter_by_reference_time);
+            }
+            ListOptions::ByReferenceAndExpireTime(expire_in_seconds) => {
+                self.appointments.retain(filter_by_reference_time);
+                self.appointments
+                    .retain(|a| a.time <= self.reference_time.clone() + expire_in_seconds);
+            }
+        }
+        self
     }
-    appointments.sort();
-    println!("{}", appointments_to_string_display(appointments));
 }
 
-/// Displays all appointments for specific dates
-pub fn display_all_from(date: NaiveDate, config: Config) {
-    let mut appointments =
-        get_appointments_from_file(&(config.appointment_file_path_builder)(date));
-    if appointments.is_empty() {
-        println!("There were no appointments added in this day.");
-        return;
+impl fmt::Display for AppointmentList {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let appointments_text = self
+            .appointments
+            .iter()
+            .map(|a| a.to_string_display(&self.reference_time))
+            .collect::<Vec<String>>()
+            .join("\n");
+
+        write!(f, "{appointments_text}")
     }
-    appointments.sort();
-    println!("{}", appointments_to_string_display(appointments));
-}
-
-/// Generate a printable string of a list of appointments
-pub fn appointments_to_string_display(appointments: Vec<Appointment>) -> String {
-    appointments
-        .into_iter()
-        .map(|a| a.to_string_display())
-        .collect::<Vec<String>>()
-        .join("\n")
-}
-
-/// Get the string version of the list of appointments
-/// Should read the appointments of a specific file and return a list
-/// of appointments
-pub fn get_appointments_from_file(path: &PathBuf) -> Vec<Appointment> {
-    let file_result = fs::read_to_string(path);
-    let file_content = match file_result {
-        Ok(content) => content,
-        Err(..) => String::new(),
-    };
-    let appointments: Vec<Result<Appointment, String>> =
-        file_content.lines().map(Appointment::from).collect();
-    appointments.into_iter().flatten().collect()
 }
 
 #[cfg(test)]
 mod tests {
     use std::{fs, fs::File, io::Write, path::PathBuf};
 
-    use crate::appointment::{list::get_appointments_from_file, Appointment, AppointmentTime};
-
-    use super::appointments_to_string_display;
+    use crate::appointment::{list::AppointmentList, Appointment, AppointmentTime};
 
     #[test]
     fn parse_file_contents() {
@@ -86,17 +106,19 @@ mod tests {
             File::create(test_file_path.to_str().unwrap()).expect("Failed to create test file");
         file.write_all(b"22:00 Go to night shift\n12:45 Visit grandma\n212 Nonsense")
             .expect("Failed to write to test file");
-        let result = get_appointments_from_file(&test_file_path);
+
+        let list = AppointmentList::from_path(AppointmentTime::now(), &test_file_path);
+        let result = list.appointments();
         assert_eq!(
             result,
             vec![
                 Appointment::new(
-                    "Go to night shift".to_string(),
-                    AppointmentTime::new(22, 0).unwrap()
-                ),
-                Appointment::new(
                     "Visit grandma".to_string(),
                     AppointmentTime::new(12, 45).unwrap()
+                ),
+                Appointment::new(
+                    "Go to night shift".to_string(),
+                    AppointmentTime::new(22, 0).unwrap()
                 ),
             ]
         );
@@ -106,7 +128,8 @@ mod tests {
     #[test]
     fn parse_file_non_existent() {
         let test_file_path = PathBuf::from("/tmp/non_existent.txt");
-        let result = get_appointments_from_file(&test_file_path);
+        let list = AppointmentList::from_path(AppointmentTime::now(), &test_file_path);
+        let result = list.appointments();
         assert_eq!(result, vec![]);
     }
 
@@ -122,10 +145,10 @@ mod tests {
                 AppointmentTime::new(8, 50).unwrap(),
             ),
         ];
-        let display = appointments_to_string_display(appointments);
+        let display = AppointmentList::from_appointments(AppointmentTime::now(), appointments);
         assert_eq!(
             "[14:30] Feed my pet fish\n[08:50] Clean my bedroom",
-            display
+            display.to_string()
         );
     }
 }
