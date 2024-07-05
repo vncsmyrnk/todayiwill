@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 SHELL ["/bin/bash", "-c"]
 RUN <<EOF
 apt-get update -qq
-apt-get install -qq -y curl wget build-essential sudo
+apt-get install -qq -y curl wget build-essential sudo libssl-dev pkg-config
 useradd -m -d /home/dev -s /bin/bash -u 1000 dev
 adduser dev sudo
 echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
