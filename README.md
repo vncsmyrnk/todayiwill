@@ -43,6 +43,13 @@ $ todayiwill add --description "Take my dog to the vet" --time "14:00"
 ```
 Appointment added successfully
 ```
+
+```bash
+$ echo "Wash the dishes" | todayiwill add --stdin
+```
+```
+Appointment added successfully
+```
 ### List appointments
 
 ```bash

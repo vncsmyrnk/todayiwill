@@ -38,7 +38,7 @@ enum Commands {
         #[arg(short, long, required_unless_present("stdin"))]
         time: Option<AppointmentTime>,
 
-        /// Parses an appointment as a string ("hh:mm appointment content")
+        /// Parses an appointment as a string from STDIN ("hh:mm appointment content")
         #[arg(long, conflicts_with_all(["description", "time"]))]
         stdin: bool,
     },
