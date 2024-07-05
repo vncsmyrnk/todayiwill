@@ -87,25 +87,18 @@ fn parse_input() -> Result<(), String> {
         } => {
             let mut list = create_list_for_current_day(&current_time, &config);
 
-            if stdin.is_some() {
-                let appointment = stdin.unwrap();
-                list.add(appointment, &config.appointment_file_path_current_day)?;
-                println!("Appointment added successfully.");
-                return Ok(());
-            }
+            let appointment = stdin.unwrap_or_else(|| {
+                Appointment::new(
+                    description.expect("Description should be available here"),
+                    time.expect("Time should be available here"),
+                )
+            });
 
-            let appointment_description =
-                description.expect("Description should be available here");
-            let appointment_time = time.expect("Time should be available here");
-
-            if appointment_time <= current_time {
+            if appointment.time <= current_time {
                 return Err(String::from("Given time already passed."));
             }
 
-            list.add(
-                Appointment::new(appointment_description, appointment_time),
-                &config.appointment_file_path_current_day,
-            )?;
+            list.add(appointment, &config.appointment_file_path_current_day)?;
             println!("Appointment added successfully.");
         }
         Commands::List { expire_in, all } => {
