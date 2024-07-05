@@ -13,6 +13,8 @@ use todayiwill::appointment::{
     Appointment, AppointmentTime,
 };
 
+mod pkg;
+
 /// A CLI for remembering what you need to do today
 #[derive(Debug, Parser)]
 #[command(name = "todayiwill")]
@@ -60,6 +62,8 @@ enum Commands {
         #[arg(short, long, value_parser=helper::str_dmy_to_naive_date)]
         date: NaiveDate,
     },
+    /// Updates the app to the latest version
+    Update,
 }
 
 fn main() {
@@ -138,6 +142,9 @@ fn parse_input() -> Result<(), String> {
             } else {
                 println!("{list}");
             }
+        }
+        Commands::Update => {
+            pkg::update()
         }
     }
 
