@@ -51,7 +51,7 @@ enum Commands {
         expire_in: Option<i32>,
 
         /// If informed, all appointments are retrieved
-        #[arg(short, long, default_value_t = false)]
+        #[arg(short, long)]
         all: bool,
     },
     /// List the appointments for other days
