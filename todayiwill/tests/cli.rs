@@ -573,14 +573,16 @@ fn add_from_stdin_should_be_possible() {
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["add", "--stdin", "20:46 Finish final assingment"])
+        .args(["add", "--stdin"])
+        .write_stdin("20:46 Finish final assingment")
         .assert()
         .success()
         .stdout("Appointment added successfully.\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["add", "--stdin", "16:23 Read another chapter of moby dick"])
+        .args(["add", "--stdin"])
+        .write_stdin("16:23 Read another chapter of moby dick")
         .assert()
         .success()
         .stdout("Appointment added successfully.\n");
@@ -597,36 +599,85 @@ fn add_from_stdin_should_be_possible() {
 
 #[test]
 #[serial]
+fn add_from_stdin_should_validate_current_time() {
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--current-time", "15:26", "--stdin"])
+        .write_stdin("12:06 A past non-urgent event")
+        .assert()
+        .failure()
+        .code(1)
+        .stderr("Given time already passed.\n");
+}
+
+#[test]
+#[serial]
+fn add_from_stdin_should_not_be_run_with_other_add_args() {
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--current-time",
+            "20:05",
+            "--stdin",
+            "--description",
+            "Some other description",
+        ])
+        .write_stdin("22:46 Appointment from stdin")
+        .assert()
+        .failure()
+        .code(2)
+        .stderr(
+            r#"error: the argument '--stdin' cannot be used with '--description <DESCRIPTION>'
+
+Usage: todayiwill add --current-time <CURRENT_TIME> --stdin
+
+For more information, try '--help'.
+"#,
+        );
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--current-time",
+            "04:45",
+            "--stdin",
+            "--time",
+            "10:56",
+        ])
+        .write_stdin("11:39 Appointment from stdin")
+        .assert()
+        .failure()
+        .code(2)
+        .stderr(
+            r#"error: the argument '--stdin' cannot be used with '--time <TIME>'
+
+Usage: todayiwill add --current-time <CURRENT_TIME> --stdin
+
+For more information, try '--help'.
+"#,
+        );
+}
+
+#[test]
+#[serial]
 fn add_from_stdin_should_error_on_invalid_entries() {
-    common::setup();
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["add", "--stdin"])
+        .write_stdin("1204 A malformed appointment")
+        .assert()
+        .failure()
+        .code(1)
+        .stderr("Invalid string for appointment time\n");
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args([
-            "add",
-            "--stdin",
-            "1204 A malformed appointment",
-        ])
+        .args(["add", "--stdin"])
+        .write_stdin("Unformatted 10:34 appointment")
         .assert()
         .failure()
-        .code(2)
-        .stderr(r#"error: invalid value '1204 A malformed appointment' for '--stdin <STDIN>': Invalid string for appointment time
-
-For more information, try '--help'.
-"#);
-
-    Command::cargo_bin("todayiwill")
-        .unwrap()
-        .args([
-            "add",
-            "--stdin",
-            "Unformatted 10:34 appointment",
-        ])
-        .assert()
-        .failure()
-        .code(2)
-        .stderr(r#"error: invalid value 'Unformatted 10:34 appointment' for '--stdin <STDIN>': Invalid string for appointment time
-
-For more information, try '--help'.
-"#);
+        .code(1)
+        .stderr("Invalid string for appointment time\n");
 }

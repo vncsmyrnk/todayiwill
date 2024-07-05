@@ -1,4 +1,4 @@
-use std::process;
+use std::{io, process};
 
 use chrono::NaiveDate;
 use clap::{Parser, Subcommand};
@@ -39,8 +39,8 @@ enum Commands {
         time: Option<AppointmentTime>,
 
         /// Parses an appointment as a string ("hh:mm appointment content")
-        #[arg(long, required(false), exclusive(true))]
-        stdin: Option<Appointment>,
+        #[arg(long, conflicts_with_all(["description", "time"]))]
+        stdin: bool,
     },
     /// Clear all the appointments added for today
     Clear,
@@ -87,12 +87,13 @@ fn parse_input() -> Result<(), String> {
         } => {
             let mut list = create_list_for_current_day(&current_time, &config);
 
-            let appointment = stdin.unwrap_or_else(|| {
-                Appointment::new(
+            let appointment = match stdin {
+                true => read_appointment_from_stdin()?,
+                false => Appointment::new(
                     description.expect("Description should be available here"),
                     time.expect("Time should be available here"),
-                )
-            });
+                ),
+            };
 
             if appointment.time <= current_time {
                 return Err(String::from("Given time already passed."));
@@ -117,16 +118,15 @@ fn parse_input() -> Result<(), String> {
             }
 
             if list.no_appointments() {
-                println!("No appointments found.")
+                println!("No appointments found.");
             } else {
-                println!("{list}")
+                println!("{list}");
             }
         }
         Commands::Clear => {
             let mut list = create_list_for_current_day(&current_time, &config);
             list.clear(&config.appointment_file_path_current_day)?;
             println!("Appointments cleared successfully.");
-            return Ok(());
         }
         Commands::History { date } => {
             let list = AppointmentList::from_path(
@@ -134,9 +134,9 @@ fn parse_input() -> Result<(), String> {
                 &(config.appointment_file_path_builder)(date),
             );
             if list.no_appointments() {
-                println!("There were no appointments added in this day.")
+                println!("There were no appointments added in this day.");
             } else {
-                println!("{list}")
+                println!("{list}");
             }
         }
     }
@@ -146,4 +146,13 @@ fn parse_input() -> Result<(), String> {
 
 fn create_list_for_current_day(current_time: &AppointmentTime, config: &Config) -> AppointmentList {
     AppointmentList::from_path(current_time, &config.appointment_file_path_current_day)
+}
+
+fn read_appointment_from_stdin() -> Result<Appointment, String> {
+    let mut buffer = String::new();
+    match io::stdin().read_line(&mut buffer) {
+        Ok(..) => (),
+        Err(error) => return Err(format!("{error}")),
+    };
+    Appointment::from(&buffer)
 }
