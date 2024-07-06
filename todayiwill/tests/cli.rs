@@ -573,7 +573,7 @@ fn add_from_stdin_should_be_possible() {
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["add", "--stdin"])
+        .args(["add", "--current-time", "19:49", "--stdin"])
         .write_stdin("20:46 Finish final assingment")
         .assert()
         .success()
@@ -581,7 +581,7 @@ fn add_from_stdin_should_be_possible() {
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["add", "--stdin"])
+        .args(["add", "--current-time", "03:12", "--stdin"])
         .write_stdin("16:23 Read another chapter of moby dick")
         .assert()
         .success()
