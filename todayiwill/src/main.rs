@@ -7,9 +7,9 @@ extern crate chrono;
 extern crate dirs;
 
 use colored::Colorize;
-use todayiwill::appointment::{
-    helper::{self, Config},
-    list::{AppointmentList, ListOptions},
+use todayiwill::{
+    helper, Config,
+    AppointmentList, ListOptions,
     Appointment, AppointmentTime,
 };
 
@@ -95,7 +95,7 @@ fn parse_input() -> Result<(), String> {
                 ),
             };
 
-            if appointment.time <= current_time {
+            if appointment.is_equal_or_past_from(&current_time) {
                 return Err(String::from("Given time already passed."));
             }
 
