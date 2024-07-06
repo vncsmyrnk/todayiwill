@@ -681,3 +681,62 @@ fn add_from_stdin_should_error_on_invalid_entries() {
         .code(1)
         .stderr("Invalid string for appointment time\n");
 }
+
+#[test]
+#[serial]
+#[ignore = "new feature 'copy'"]
+fn copy_appointments_from_past_days_should_be_ok() {
+    common::setup();
+
+    common::helper_write_to_appointment_data_file(
+        b"02:55 Visit Jane on the Hospital\n08:23 Work out",
+        NaiveDate::from_ymd_opt(2024, 2, 10).unwrap(),
+    );
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--all"])
+        .assert()
+        .success()
+        .stdout("There are no appointments added for today.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["copy", "--from", "10/02/2024"])
+        .assert()
+        .success()
+        .stdout("Appointments copied to current day.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--all", "--current-date", "01:56"])
+        .assert()
+        .success()
+        .stdout("[02:55] Visit Jane on the Hospital\n[08:23] Work out");
+        
+    common::remove_all_appointment_files();
+}
+
+#[test]
+#[serial]
+#[ignore = "new feature 'copy'"]
+fn copy_appointments_from_empty_days_should_error() {
+    common::setup();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--all"])
+        .assert()
+        .success()
+        .stdout("There are no appointments added for today.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["copy", "--from", "23/09/2007"])
+        .assert()
+        .failure()
+        .code(1)
+        .stderr("Given day has no appointments.\n");
+        
+    common::remove_all_appointment_files();
+}
