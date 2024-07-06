@@ -38,6 +38,12 @@ enum Commands {
         #[arg(long, conflicts_with_all(["description", "time"]))]
         stdin: bool,
     },
+    /// Copies the appointments from a specific date to today
+    Copy {
+        /// Date wich the appointments will be copied from
+        #[arg(short, long, value_parser=helper::str_dmy_to_naive_date)]
+        from: NaiveDate,
+    },
     /// Clear all the appointments added for today
     Clear,
     /// List the appointments to come for today
@@ -98,6 +104,17 @@ fn parse_input() -> Result<(), String> {
             list.add(appointment)?;
             println!("Appointment added successfully.");
         }
+        Commands::Copy { from } => {
+            let mut list = create_list_for_current_day(&current_time, &config);
+            let path_for_date = (config.appointment_file_path_builder)(from);
+            list.copy(&path_for_date)?;
+            println!("Appointments copied to current day.");
+        }
+        Commands::Clear => {
+            let mut list = create_list_for_current_day(&current_time, &config);
+            list.clear()?;
+            println!("Appointments cleared successfully.");
+        }
         Commands::List { expire_in, all } => {
             let mut list = create_list_for_current_day(&current_time, &config);
 
@@ -118,11 +135,6 @@ fn parse_input() -> Result<(), String> {
             } else {
                 println!("{list}");
             }
-        }
-        Commands::Clear => {
-            let mut list = create_list_for_current_day(&current_time, &config);
-            list.clear()?;
-            println!("Appointments cleared successfully.");
         }
         Commands::History { date } => {
             let path_for_date = (config.appointment_file_path_builder)(date);

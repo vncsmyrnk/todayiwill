@@ -684,7 +684,6 @@ fn add_from_stdin_should_error_on_invalid_entries() {
 
 #[test]
 #[serial]
-#[ignore = "new feature 'copy'"]
 fn copy_appointments_from_past_days_should_be_ok() {
     common::setup();
 
@@ -709,17 +708,16 @@ fn copy_appointments_from_past_days_should_be_ok() {
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["list", "--all", "--current-date", "01:56"])
+        .args(["list", "--all", "--current-time", "01:56"])
         .assert()
         .success()
-        .stdout("[02:55] Visit Jane on the Hospital\n[08:23] Work out");
+        .stdout("[02:55] Visit Jane on the Hospital\n[08:23] Work out\n");
 
     common::remove_all_appointment_files();
 }
 
 #[test]
 #[serial]
-#[ignore = "new feature 'copy'"]
 fn copy_appointments_from_empty_days_should_error() {
     common::setup();
 

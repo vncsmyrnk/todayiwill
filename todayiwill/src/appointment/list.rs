@@ -84,12 +84,28 @@ impl<'a> AppointmentList<'a> {
         self
     }
 
+    pub fn copy(&mut self, from: &PathBuf) -> Result<(), String> {
+        if !from.exists() {
+            return Err(String::from("Given day has no appointments."));
+        }
+        match fs::copy(from, self.path) {
+            Ok(..) => {
+                self.load();
+                Ok(())
+            }
+            Err(error) => Err(format!(
+                "An error ocurred while copying an appointments file. {}",
+                error
+            )),
+        }
+    }
+
     pub fn clear(&mut self) -> Result<(), String> {
         self.appointments = vec![];
         match fs::remove_file(self.path) {
             Ok(..) => Ok(()),
             Err(error) => Err(format!(
-                "An error occurred when clearing the appointments. {}",
+                "An error occurred while clearing the appointments. {}",
                 error
             )),
         }
