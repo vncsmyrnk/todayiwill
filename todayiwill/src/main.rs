@@ -7,11 +7,7 @@ extern crate chrono;
 extern crate dirs;
 
 use colored::Colorize;
-use todayiwill::{
-    helper, Config,
-    AppointmentList, ListOptions,
-    Appointment, AppointmentTime,
-};
+use todayiwill::{helper, Appointment, AppointmentList, AppointmentTime, Config, ListOptions};
 
 /// A CLI for remembering what you need to do today
 #[derive(Debug, Parser)]
@@ -99,7 +95,7 @@ fn parse_input() -> Result<(), String> {
                 return Err(String::from("Given time already passed."));
             }
 
-            list.add(appointment, &config.appointment_file_path_current_day)?;
+            list.add(appointment)?;
             println!("Appointment added successfully.");
         }
         Commands::List { expire_in, all } => {
@@ -125,14 +121,12 @@ fn parse_input() -> Result<(), String> {
         }
         Commands::Clear => {
             let mut list = create_list_for_current_day(&current_time, &config);
-            list.clear(&config.appointment_file_path_current_day)?;
+            list.clear()?;
             println!("Appointments cleared successfully.");
         }
         Commands::History { date } => {
-            let list = AppointmentList::from_path(
-                &current_time,
-                &(config.appointment_file_path_builder)(date),
-            );
+            let path_for_date = (config.appointment_file_path_builder)(date);
+            let list = AppointmentList::new(&current_time, &path_for_date);
             if list.no_appointments() {
                 println!("There were no appointments added in this day.");
             } else {
@@ -144,8 +138,11 @@ fn parse_input() -> Result<(), String> {
     Ok(())
 }
 
-fn create_list_for_current_day(current_time: &AppointmentTime, config: &Config) -> AppointmentList {
-    AppointmentList::from_path(current_time, &config.appointment_file_path_current_day)
+fn create_list_for_current_day<'a>(
+    current_time: &'a AppointmentTime,
+    config: &'a Config,
+) -> AppointmentList<'a> {
+    AppointmentList::new(current_time, &config.appointment_file_path_current_day)
 }
 
 fn read_appointment_from_stdin() -> Result<Appointment, String> {

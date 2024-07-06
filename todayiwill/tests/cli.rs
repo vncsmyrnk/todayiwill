@@ -713,7 +713,7 @@ fn copy_appointments_from_past_days_should_be_ok() {
         .assert()
         .success()
         .stdout("[02:55] Visit Jane on the Hospital\n[08:23] Work out");
-        
+
     common::remove_all_appointment_files();
 }
 
@@ -737,6 +737,6 @@ fn copy_appointments_from_empty_days_should_error() {
         .failure()
         .code(1)
         .stderr("Given day has no appointments.\n");
-        
+
     common::remove_all_appointment_files();
 }
