@@ -25,13 +25,14 @@ Usage: todayiwill [OPTIONS] <COMMAND>
 
 Commands:
   add      Add appointment for today
+  copy     Copies the appointments from a specific date to today
   clear    Clear all the appointments added for today
   list     List the appointments to come for today
   history  List the appointments for other days
   help     Print this message or the help of the given subcommand(s)
 
 Options:
-  -c, --current-time <CURRENT_TIME>  Current time, defaults to system time [default: 18:29]
+  -c, --current-time <CURRENT_TIME>  Current time, defaults to system time [default: 23:59]
   -h, --help                         Print help
   -V, --version                      Print version
 ```
