@@ -32,9 +32,9 @@ Commands:
   help     Print this message or the help of the given subcommand(s)
 
 Options:
-  -c, --current-time <CURRENT_TIME>  Current time, defaults to system time [default: 23:59]
-  -h, --help                         Print help
-  -V, --version                      Print version
+  -c, --current-time <HH:MM>  Current time, defaults to system time [default: 13:24]
+  -h, --help                  Print help
+  -V, --version               Print version
 ```
 ### Add appointments
 
@@ -46,7 +46,7 @@ Appointment added successfully
 ```
 
 ```bash
-$ echo "Wash the dishes" | todayiwill add --stdin
+$ echo "19:30 Wash the dishes" | todayiwill add --stdin
 ```
 ```
 Appointment added successfully
