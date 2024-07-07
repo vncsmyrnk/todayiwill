@@ -85,6 +85,11 @@ impl<'a> AppointmentList<'a> {
     }
 
     pub fn copy(&mut self, from: &PathBuf) -> Result<(), String> {
+        if !self.appointments.is_empty() {
+            return Err(String::from(
+                "Copy not possible, there are appointments for the current day.",
+            ));
+        }
         if !from.exists() {
             return Err(String::from("Given day has no appointments."));
         }
