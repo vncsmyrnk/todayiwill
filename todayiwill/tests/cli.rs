@@ -546,9 +546,9 @@ fn history_invalid_entries() {
         .code(2)
         .stderr(
             r#"error: the following required arguments were not provided:
-  --date <DATE>
+  --date <DD/MM/YYYY>
 
-Usage: todayiwill history --date <DATE>
+Usage: todayiwill history --date <DD/MM/YYYY>
 
 For more information, try '--help'.
 "#,
@@ -560,7 +560,7 @@ For more information, try '--help'.
         .assert()
         .failure()
         .code(2)
-        .stderr(r#"error: invalid value '01-2023-22' for '--date <DATE>': input contains invalid characters
+        .stderr(r#"error: invalid value '01-2023-22' for '--date <DD/MM/YYYY>': input contains invalid characters
 
 For more information, try '--help'.
 "#);
@@ -751,9 +751,9 @@ fn copy_command_with_no_arguments_should_error() {
         .code(2)
         .stderr(
             r#"error: the following required arguments were not provided:
-  --from <DATE>
+  --from <DD/MM/YYYY>
 
-Usage: todayiwill copy --from <DATE>
+Usage: todayiwill copy --from <DD/MM/YYYY>
 
 For more information, try '--help'.
 "#,

@@ -41,7 +41,7 @@ enum Commands {
     /// Copies the appointments from a specific date to today
     Copy {
         /// Date wich the appointments will be copied from
-        #[arg(short, long, value_parser=helper::str_dmy_to_naive_date, value_name = "DATE")]
+        #[arg(short, long, value_parser=helper::str_dmy_to_naive_date, value_name = "DD/MM/YYYY")]
         from: NaiveDate,
     },
     /// Clear all the appointments added for today
@@ -59,7 +59,7 @@ enum Commands {
     /// List the appointments for other days
     History {
         /// Show appointments which will expire in X seconds
-        #[arg(short, long, value_parser=helper::str_dmy_to_naive_date, value_name = "DATE")]
+        #[arg(short, long, value_parser=helper::str_dmy_to_naive_date, value_name = "DD/MM/YYYY")]
         date: NaiveDate,
     },
 }
