@@ -60,6 +60,26 @@ impl<'a> AppointmentList<'a> {
         Ok(())
     }
 
+    pub fn remove(&mut self, time: AppointmentTime) -> Result<(), String> {
+        match self.appointments.iter().position(|a| a.time == time) {
+            Some(index) => {
+                if self.appointments[index].is_equal_or_past_from(self.reference_time) {
+                    return Err(String::from(
+                        "This appointment is already past and cannot be removed.",
+                    ));
+                }
+                self.appointments.remove(index);
+            }
+            None => {
+                return Err(String::from(
+                    "There is no appointment at this specific time.",
+                ))
+            }
+        };
+        self.write()?;
+        Ok(())
+    }
+
     pub fn write(&self) -> Result<(), String> {
         match self.write_to_file() {
             Ok(..) => Ok(()),

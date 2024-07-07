@@ -62,6 +62,12 @@ enum Commands {
         #[arg(short, long, value_parser=helper::str_dmy_to_naive_date, value_name = "DD/MM/YYYY")]
         date: NaiveDate,
     },
+    /// Removes a future appointment
+    Remove {
+        /// Appointment time
+        #[arg(short, long, value_name = "HH:MM")]
+        time: AppointmentTime,
+    },
 }
 
 fn main() {
@@ -144,6 +150,11 @@ fn parse_input() -> Result<(), String> {
             } else {
                 println!("{list}");
             }
+        }
+        Commands::Remove { time } => {
+            let mut list = create_list_for_current_day(&current_time, &config);
+            list.remove(time)?;
+            println!("Appointment removed successfully.");
         }
     }
 

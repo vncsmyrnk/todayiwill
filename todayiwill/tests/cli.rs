@@ -884,3 +884,110 @@ fn add_with_an_existing_time_should_override() {
 
     common::remove_all_appointment_files();
 }
+
+#[test]
+#[serial]
+fn delete_an_appointment_should_be_ok() {
+    common::setup();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Cancel the trip ticket",
+            "--time",
+            "14:29",
+            "--current-time",
+            "11:46",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Fix heater",
+            "--time",
+            "17:02",
+            "--current-time",
+            "11:46",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["remove", "--time", "17:02", "--current-time", "14:56"])
+        .assert()
+        .success()
+        .stdout("Appointment removed successfully.\n");
+
+    common::remove_all_appointment_files();
+}
+
+#[test]
+#[serial]
+fn delete_a_non_existent_appointment_should_error() {
+    common::setup();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Cook dinner",
+            "--time",
+            "20:30",
+            "--current-time",
+            "17:12",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["remove", "--time", "22:41", "--current-time", "19:34"])
+        .assert()
+        .failure()
+        .code(1)
+        .stderr("There is no appointment at this specific time.\n");
+
+    common::remove_all_appointment_files();
+}
+
+#[test]
+#[serial]
+fn delete_a_past_appointment_should_error() {
+    common::setup();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Change light bulb",
+            "--time",
+            "05:00",
+            "--current-time",
+            "02:48",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["remove", "--time", "05:00", "--current-time", "12:57"])
+        .assert()
+        .failure()
+        .code(1)
+        .stderr("This appointment is already past and cannot be removed.\n");
+
+    common::remove_all_appointment_files();
+}
