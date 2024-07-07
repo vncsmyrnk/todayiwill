@@ -260,7 +260,7 @@ fn add_invalid_entries_for_time() {
         .failure()
         .code(2)
         .stderr(
-            r#"error: invalid value '9:y3' for '--time <TIME>': Invalid string for appointment time
+            r#"error: invalid value '9:y3' for '--time <HH:MM>': Invalid string for appointment time
 
 For more information, try '--help'.
 "#,
@@ -273,7 +273,7 @@ For more information, try '--help'.
         .failure()
         .code(2)
         .stderr(
-            r#"error: invalid value '24:10' for '--time <TIME>': Hour should be between 0 and 23
+            r#"error: invalid value '24:10' for '--time <HH:MM>': Hour should be between 0 and 23
 
 For more information, try '--help'.
 "#,
@@ -286,7 +286,7 @@ For more information, try '--help'.
         .failure()
         .code(2)
         .stderr(
-            r#"error: invalid value '15:60' for '--time <TIME>': Minutes should be between 0 and 59
+            r#"error: invalid value '15:60' for '--time <HH:MM>': Minutes should be between 0 and 59
 
 For more information, try '--help'.
 "#,
@@ -342,7 +342,7 @@ fn add_invalid_entries_for_current_time() {
         .assert()
         .failure()
         .code(2)
-        .stderr(r#"error: invalid value '23:60' for '--current-time <CURRENT_TIME>': Minutes should be between 0 and 59
+        .stderr(r#"error: invalid value '23:60' for '--current-time <HH:MM>': Minutes should be between 0 and 59
 
 For more information, try '--help'.
 "#);
@@ -361,7 +361,7 @@ For more information, try '--help'.
         .assert()
         .failure()
         .code(2)
-        .stderr(r#"error: invalid value '10:00pm' for '--current-time <CURRENT_TIME>': Invalid string for appointment time
+        .stderr(r#"error: invalid value '10:00pm' for '--current-time <HH:MM>': Invalid string for appointment time
 
 For more information, try '--help'.
 "#);
@@ -378,9 +378,9 @@ fn add_invalid_entries_missing_parameters() {
         .code(2)
         .stderr(
             r#"error: the following required arguments were not provided:
-  --description <DESCRIPTION>
+  --description <STRING>
 
-Usage: todayiwill add --time <TIME> --description <DESCRIPTION>
+Usage: todayiwill add --time <HH:MM> --description <STRING>
 
 For more information, try '--help'.
 "#,
@@ -394,9 +394,9 @@ For more information, try '--help'.
         .code(2)
         .stderr(
             r#"error: the following required arguments were not provided:
-  --time <TIME>
+  --time <HH:MM>
 
-Usage: todayiwill add --description <DESCRIPTION> --time <TIME>
+Usage: todayiwill add --description <STRING> --time <HH:MM>
 
 For more information, try '--help'.
 "#,
@@ -410,10 +410,10 @@ For more information, try '--help'.
         .code(2)
         .stderr(
             r#"error: the following required arguments were not provided:
-  --description <DESCRIPTION>
-  --time <TIME>
+  --description <STRING>
+  --time <HH:MM>
 
-Usage: todayiwill add --description <DESCRIPTION> --time <TIME>
+Usage: todayiwill add --description <STRING> --time <HH:MM>
 
 For more information, try '--help'.
 "#,
@@ -429,7 +429,7 @@ fn list_invalid_entries_current_time() {
         .assert()
         .failure()
         .code(2)
-        .stderr(r#"error: invalid value '23:60' for '--current-time <CURRENT_TIME>': Minutes should be between 0 and 59
+        .stderr(r#"error: invalid value '23:60' for '--current-time <HH:MM>': Minutes should be between 0 and 59
 
 For more information, try '--help'.
 "#);
@@ -440,7 +440,7 @@ For more information, try '--help'.
         .assert()
         .failure()
         .code(2)
-        .stderr(r#"error: invalid value 'as:' for '--current-time <CURRENT_TIME>': Invalid string for appointment time
+        .stderr(r#"error: invalid value 'as:' for '--current-time <HH:MM>': Invalid string for appointment time
 
 For more information, try '--help'.
 "#);
@@ -546,9 +546,9 @@ fn history_invalid_entries() {
         .code(2)
         .stderr(
             r#"error: the following required arguments were not provided:
-  --date <DATE>
+  --date <DD/MM/YYYY>
 
-Usage: todayiwill history --date <DATE>
+Usage: todayiwill history --date <DD/MM/YYYY>
 
 For more information, try '--help'.
 "#,
@@ -560,7 +560,7 @@ For more information, try '--help'.
         .assert()
         .failure()
         .code(2)
-        .stderr(r#"error: invalid value '01-2023-22' for '--date <DATE>': input contains invalid characters
+        .stderr(r#"error: invalid value '01-2023-22' for '--date <DD/MM/YYYY>': input contains invalid characters
 
 For more information, try '--help'.
 "#);
@@ -573,7 +573,7 @@ fn add_from_stdin_should_be_possible() {
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["add", "--stdin"])
+        .args(["add", "--current-time", "19:49", "--stdin"])
         .write_stdin("20:46 Finish final assingment")
         .assert()
         .success()
@@ -581,7 +581,7 @@ fn add_from_stdin_should_be_possible() {
 
     Command::cargo_bin("todayiwill")
         .unwrap()
-        .args(["add", "--stdin"])
+        .args(["add", "--current-time", "03:12", "--stdin"])
         .write_stdin("16:23 Read another chapter of moby dick")
         .assert()
         .success()
@@ -628,9 +628,9 @@ fn add_from_stdin_should_not_be_run_with_other_add_args() {
         .failure()
         .code(2)
         .stderr(
-            r#"error: the argument '--stdin' cannot be used with '--description <DESCRIPTION>'
+            r#"error: the argument '--stdin' cannot be used with '--description <STRING>'
 
-Usage: todayiwill add --current-time <CURRENT_TIME> --stdin
+Usage: todayiwill add --current-time <HH:MM> --stdin
 
 For more information, try '--help'.
 "#,
@@ -651,9 +651,9 @@ For more information, try '--help'.
         .failure()
         .code(2)
         .stderr(
-            r#"error: the argument '--stdin' cannot be used with '--time <TIME>'
+            r#"error: the argument '--stdin' cannot be used with '--time <HH:MM>'
 
-Usage: todayiwill add --current-time <CURRENT_TIME> --stdin
+Usage: todayiwill add --current-time <HH:MM> --stdin
 
 For more information, try '--help'.
 "#,
@@ -680,4 +680,82 @@ fn add_from_stdin_should_error_on_invalid_entries() {
         .failure()
         .code(1)
         .stderr("Invalid string for appointment time\n");
+}
+
+#[test]
+#[serial]
+fn copy_appointments_from_past_days_should_be_ok() {
+    common::setup();
+
+    common::helper_write_to_appointment_data_file(
+        b"02:55 Visit Jane on the Hospital\n08:23 Work out",
+        NaiveDate::from_ymd_opt(2024, 2, 10).unwrap(),
+    );
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--all"])
+        .assert()
+        .success()
+        .stdout("There are no appointments added for today.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["copy", "--from", "10/02/2024"])
+        .assert()
+        .success()
+        .stdout("Appointments copied to current day.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--all", "--current-time", "01:56"])
+        .assert()
+        .success()
+        .stdout("[02:55] Visit Jane on the Hospital\n[08:23] Work out\n");
+
+    common::remove_all_appointment_files();
+}
+
+#[test]
+#[serial]
+fn copy_appointments_from_empty_days_should_error() {
+    common::setup();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--all"])
+        .assert()
+        .success()
+        .stdout("There are no appointments added for today.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["copy", "--from", "23/09/2007"])
+        .assert()
+        .failure()
+        .code(1)
+        .stderr("Given day has no appointments.\n");
+
+    common::remove_all_appointment_files();
+}
+
+#[test]
+#[serial]
+fn copy_command_with_no_arguments_should_error() {
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["copy"])
+        .write_stdin("11:39 Appointment from stdin")
+        .assert()
+        .failure()
+        .code(2)
+        .stderr(
+            r#"error: the following required arguments were not provided:
+  --from <DD/MM/YYYY>
+
+Usage: todayiwill copy --from <DD/MM/YYYY>
+
+For more information, try '--help'.
+"#,
+        );
 }
