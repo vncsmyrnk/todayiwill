@@ -795,3 +795,92 @@ fn copy_command_should_error_if_there_are_appointments_for_today() {
 
     common::remove_all_appointment_files();
 }
+
+#[test]
+#[serial]
+fn add_with_an_existing_time_should_override() {
+    common::setup();
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Watch the soccer game",
+            "--time",
+            "18:25",
+            "--current-time",
+            "10:00",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Search for a new car",
+            "--time",
+            "20:03",
+            "--current-time",
+            "10:01",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--all"])
+        .assert()
+        .success()
+        .stdout("[18:25] Watch the soccer game\n[20:03] Search for a new car\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Learn Rust",
+            "--time",
+            "20:03",
+            "--current-time",
+            "10:01",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--all"])
+        .assert()
+        .success()
+        .stdout("[18:25] Watch the soccer game\n[20:03] Learn Rust\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Clean bedsheets",
+            "--time",
+            "12:04",
+            "--current-time",
+            "10:01",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["list", "--all"])
+        .assert()
+        .success()
+        .stdout("[12:04] Clean bedsheets\n[18:25] Watch the soccer game\n[20:03] Learn Rust\n");
+
+    common::remove_all_appointment_files();
+}
