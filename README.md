@@ -29,10 +29,11 @@ Commands:
   clear    Clear all the appointments added for today
   list     List the appointments to come for today
   history  List the appointments for other days
+  remove   Removes a future appointment
   help     Print this message or the help of the given subcommand(s)
 
 Options:
-  -c, --current-time <HH:MM>  Current time, defaults to system time [default: 13:24]
+  -c, --current-time <HH:MM>  Current time, defaults to system time [default: 23:59]
   -h, --help                  Print help
   -V, --version               Print version
 ```
