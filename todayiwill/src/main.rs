@@ -18,7 +18,7 @@ struct Cli {
     command: Commands,
 
     /// Current time, defaults to system time
-    #[arg(short, long, global=true, default_value_t=AppointmentTime::now())]
+    #[arg(short, long, global=true, default_value_t=AppointmentTime::now(), value_name = "HH:MM")]
     current_time: AppointmentTime,
 }
 
@@ -27,11 +27,11 @@ enum Commands {
     /// Add appointment for today
     Add {
         /// Appointment description
-        #[arg(short, long, required_unless_present("stdin"))]
+        #[arg(short, long, required_unless_present("stdin"), value_name = "STRING")]
         description: Option<String>,
 
         /// Appointment time
-        #[arg(short, long, required_unless_present("stdin"))]
+        #[arg(short, long, required_unless_present("stdin"), value_name = "HH:MM")]
         time: Option<AppointmentTime>,
 
         /// Parses an appointment as a string from STDIN ("hh:mm appointment content")
@@ -41,7 +41,7 @@ enum Commands {
     /// Copies the appointments from a specific date to today
     Copy {
         /// Date wich the appointments will be copied from
-        #[arg(short, long, value_parser=helper::str_dmy_to_naive_date)]
+        #[arg(short, long, value_parser=helper::str_dmy_to_naive_date, value_name = "DATE")]
         from: NaiveDate,
     },
     /// Clear all the appointments added for today
@@ -49,7 +49,7 @@ enum Commands {
     /// List the appointments to come for today
     List {
         /// Show appointments which will expire in X seconds
-        #[arg(short, long)]
+        #[arg(short, long, value_name = "SECONDS")]
         expire_in: Option<i32>,
 
         /// If informed, all appointments are retrieved
@@ -59,7 +59,7 @@ enum Commands {
     /// List the appointments for other days
     History {
         /// Show appointments which will expire in X seconds
-        #[arg(short, long, value_parser=helper::str_dmy_to_naive_date)]
+        #[arg(short, long, value_parser=helper::str_dmy_to_naive_date, value_name = "DATE")]
         date: NaiveDate,
     },
 }
