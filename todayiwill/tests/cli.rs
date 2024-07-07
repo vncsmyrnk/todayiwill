@@ -887,7 +887,6 @@ fn add_with_an_existing_time_should_override() {
 
 #[test]
 #[serial]
-#[ignore = "feature 'remove' not implemented yet"]
 fn delete_an_appointment_should_be_ok() {
     common::setup();
 
@@ -933,7 +932,6 @@ fn delete_an_appointment_should_be_ok() {
 
 #[test]
 #[serial]
-#[ignore = "feature 'remove' not implemented yet"]
 fn delete_a_non_existent_appointment_should_error() {
     common::setup();
 
@@ -965,7 +963,6 @@ fn delete_a_non_existent_appointment_should_error() {
 
 #[test]
 #[serial]
-#[ignore = "feature 'remove' not implemented yet"]
 fn delete_a_past_appointment_should_error() {
     common::setup();
 
