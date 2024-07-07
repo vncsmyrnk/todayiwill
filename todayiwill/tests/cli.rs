@@ -759,3 +759,39 @@ For more information, try '--help'.
 "#,
         );
 }
+
+#[test]
+#[serial]
+fn copy_command_should_error_if_there_are_appointments_for_today() {
+    common::setup();
+
+    common::helper_write_to_appointment_data_file(
+        b"18:37 Buy groceries",
+        NaiveDate::from_ymd_opt(2023, 8, 28).unwrap(),
+    );
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args([
+            "add",
+            "--description",
+            "Clean the house",
+            "--time",
+            "10:44",
+            "--current-time",
+            "03:12",
+        ])
+        .assert()
+        .success()
+        .stdout("Appointment added successfully.\n");
+
+    Command::cargo_bin("todayiwill")
+        .unwrap()
+        .args(["copy", "--from", "28/08/2023"])
+        .assert()
+        .failure()
+        .code(1)
+        .stderr("Copy not possible, there are appointments for the current day.\n");
+
+    common::remove_all_appointment_files();
+}
