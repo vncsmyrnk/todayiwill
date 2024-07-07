@@ -53,6 +53,9 @@ impl<'a> AppointmentList<'a> {
     }
 
     pub fn add(&mut self, appointment: Appointment) -> Result<(), String> {
+        self.appointments.retain(|a| {
+            a.time != appointment.time
+        });
         self.appointments.push(appointment);
         self.appointments.sort();
         self.write()?;

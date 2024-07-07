@@ -798,7 +798,6 @@ fn copy_command_should_error_if_there_are_appointments_for_today() {
 
 #[test]
 #[serial]
-#[ignore = "feature of override appointments not available"]
 fn add_with_an_existing_time_should_override() {
     common::setup();
 
