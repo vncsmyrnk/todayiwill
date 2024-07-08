@@ -11,4 +11,3 @@ clap = { version = "4.5.7", features = ["derive"] }
 colored = "2.1.0"
 dirs = "5.0.1"
 serial_test = "3.1.1"
-whoami = "1.5.1"
