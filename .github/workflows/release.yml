@@ -35,6 +35,15 @@ jobs:
       - name: Build
         run: cargo build --release
 
+      - name: Build doc
+        run: cargo doc --no-deps
+
+      - name: Upload Documentation
+        uses: actions/upload-artifact@v2
+        with:
+          name: documentation
+          path: target/doc
+
       - uses: actions/upload-artifact@v4
         with:
           name: artifacts
@@ -46,16 +55,44 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Download artifact
+      - name: Download build artifact
         id: download-artifact
         uses: actions/download-artifact@v4
         with:
           name: artifacts
           path: artifacts
 
-      - name: List artifacts generated
+      - name: List build artifacts generated
         run: ls ./artifacts/**/*
+
+      - name: Download documentation artifact
+        id: download-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation
+          path: documentation
+
+      - name: List documentation generated
+        run: ls ./documentation/**/*
+
+      - name: Setup Pages for documentation
+        uses: actions/configure-pages@v3
+
+      - name: Upload documentation to pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./documentation
+
+      - name: Deploy documentation to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: Build Changelog
         id: github_release
