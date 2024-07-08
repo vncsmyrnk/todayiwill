@@ -9,7 +9,7 @@ use crate::appointment::AppointmentTime;
 
 use super::Appointment;
 
-pub enum ListOptions {
+pub enum FilterOptions {
     ByReferenceTime,
     ByReferenceAndExpireTime(i32),
 }
@@ -90,13 +90,13 @@ impl<'a> AppointmentList<'a> {
         }
     }
 
-    pub fn filter(&mut self, options: ListOptions) -> &Self {
+    pub fn filter(&mut self, options: FilterOptions) -> &Self {
         let filter_by_reference_time = |a: &Appointment| a.time > *self.reference_time;
         match options {
-            ListOptions::ByReferenceTime => {
+            FilterOptions::ByReferenceTime => {
                 self.appointments.retain(filter_by_reference_time);
             }
-            ListOptions::ByReferenceAndExpireTime(expire_in_seconds) => {
+            FilterOptions::ByReferenceAndExpireTime(expire_in_seconds) => {
                 self.appointments.retain(filter_by_reference_time);
                 self.appointments
                     .retain(|a| a.time <= self.reference_time.clone() + expire_in_seconds);
@@ -166,7 +166,7 @@ mod tests {
     use std::{fs, fs::File, io::Write, path::PathBuf};
 
     use crate::appointment::{
-        list::{AppointmentList, ListOptions},
+        list::{AppointmentList, FilterOptions},
         Appointment, AppointmentTime,
     };
 
@@ -190,7 +190,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_file_contents() {
+    fn parse_and_load_file_content_should_be_ok() {
         let test_file_path = PathBuf::from("/tmp")
             .join("todayilearn-test-list")
             .join("appointments.txt");
@@ -220,7 +220,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_file_non_existent() {
+    fn non_existent_file_should_be_parsed_as_empty_vec() {
         let test_file_path = PathBuf::from("/tmp/non_existent.txt");
         let reference_time = AppointmentTime::now();
         let list = AppointmentList::new(&reference_time, &test_file_path);
@@ -250,13 +250,13 @@ mod tests {
     }
 
     #[test]
-    fn filter_should_retain_by_time() {
+    fn filter_should_retain_by_reference_time() {
         let path = generate_path_for_test("filter_should_retain_by_time");
         let reference_time = AppointmentTime::new(7, 29).unwrap();
         let mut list = AppointmentList::new(&reference_time, &path);
         list.add(Appointment::new(
             String::from("Close the windows"),
-            AppointmentTime::new(6, 20).unwrap(),
+            AppointmentTime::new(7, 29).unwrap(),
         ))
         .unwrap();
         list.add(Appointment::new(
@@ -266,22 +266,52 @@ mod tests {
         .unwrap();
         list.add(Appointment::new(
             String::from("Check the news"),
-            AppointmentTime::new(8, 0).unwrap(),
+            AppointmentTime::new(7, 30).unwrap(),
         ))
         .unwrap();
-        let reference_time = AppointmentTime::new(7, 34).unwrap();
-        let mut list = AppointmentList::new(&reference_time, &path);
+
         assert_eq!(
             &vec![Appointment::new(
                 String::from("Check the news"),
-                AppointmentTime::new(8, 0).unwrap(),
+                AppointmentTime::new(7, 30).unwrap(),
             ),],
-            list.filter(ListOptions::ByReferenceTime).appointments()
+            list.filter(FilterOptions::ByReferenceTime).appointments()
         );
     }
 
     #[test]
-    fn appointments_write_to_file() {
+    fn filter_should_retain_by_reference_and_expire_time() {
+        let path = generate_path_for_test("filter_should_retain_by_time");
+        let reference_time = AppointmentTime::new(16, 23).unwrap();
+        let mut list = AppointmentList::new(&reference_time, &path);
+        list.add(Appointment::new(
+            String::from("Format pc"),
+            AppointmentTime::new(18, 1).unwrap(),
+        ))
+        .unwrap();
+        list.add(Appointment::new(
+            String::from("Do the laundry"),
+            AppointmentTime::new(16, 28).unwrap(),
+        ))
+        .unwrap();
+        list.add(Appointment::new(
+            String::from("Check the news"),
+            AppointmentTime::new(16, 29).unwrap(),
+        ))
+        .unwrap();
+
+        assert_eq!(
+            &vec![Appointment::new(
+                String::from("Do the laundry"),
+                AppointmentTime::new(16, 28).unwrap(),
+            ),],
+            list.filter(FilterOptions::ByReferenceAndExpireTime(5))
+                .appointments()
+        );
+    }
+
+    #[test]
+    fn writing_appointments_to_file_should_be_ok() {
         let path = PathBuf::from("/tmp")
             .join("todayilearn-test-add")
             .join("test_file.txt");
@@ -305,9 +335,37 @@ mod tests {
             AppointmentTime::new(16, 56).unwrap(),
         ))
         .unwrap();
+
+        list.add(Appointment::new(
+            String::from("Clean kitchen floor"),
+            AppointmentTime::new(20, 45).unwrap(),
+        ))
+        .unwrap();
+
         list.write().expect("Failed to write appointments on file");
-        let file_result = fs::read_to_string(&path).expect("Failed to read file content");
-        assert_eq!("15:46 Call aunt Anna\n16:56 Buy new cup\n", file_result);
+
+        assert_eq!(
+            "15:46 Call aunt Anna\n16:56 Buy new cup\n20:45 Clean kitchen floor\n",
+            fs::read_to_string(&path).expect("Failed to read file content")
+        );
+
+        list.remove(AppointmentTime::new(16, 56).unwrap()).unwrap();
+
+        assert_eq!(
+            "15:46 Call aunt Anna\n20:45 Clean kitchen floor\n",
+            fs::read_to_string(&path).expect("Failed to read file content")
+        );
+
+        list.add(Appointment::new(
+            String::from("Appointment to override existent"),
+            AppointmentTime::new(15, 46).unwrap(),
+        ))
+        .unwrap();
+
+        assert_eq!(
+            "15:46 Appointment to override existent\n20:45 Clean kitchen floor\n",
+            fs::read_to_string(&path).expect("Failed to read file content")
+        );
     }
 
     #[test]
@@ -322,10 +380,23 @@ mod tests {
             AppointmentTime::new(10, 43).unwrap(),
         ))
         .expect("Failed to add a new appointment to the list");
-        let file_content = fs::read_to_string(&path).expect("Failed to read file content");
+
         assert_eq!(
-            "09:15 Wash the dishes\n10:43 Visit cousin Frank\n15:30 Go to the bank\n",
-            file_content
+            &vec![
+                Appointment::new(
+                    String::from("Wash the dishes"),
+                    AppointmentTime::new(9, 15).unwrap()
+                ),
+                Appointment::new(
+                    String::from("Visit cousin Frank"),
+                    AppointmentTime::new(10, 43).unwrap()
+                ),
+                Appointment::new(
+                    String::from("Go to the bank"),
+                    AppointmentTime::new(15, 30).unwrap()
+                )
+            ],
+            list.appointments()
         );
     }
 
@@ -397,6 +468,55 @@ mod tests {
                 "[19:17] Update my professional portfolio"
             ),
             list.to_string()
+        );
+    }
+
+    #[test]
+    fn copy_should_be_ok() {
+        let path_origin = generate_path_for_test("copy_should_be_ok_origin");
+        write_to_path(&path_origin, b"09:23 The original appointment");
+
+        let reference_time = AppointmentTime::new(12, 46).unwrap();
+        let path_dist = generate_path_for_test("copy_should_be_ok_dist");
+        let mut list = AppointmentList::new(&reference_time, &path_dist);
+        assert!(list.no_appointments());
+
+        list.copy(&path_origin).unwrap();
+        assert_eq!(
+            &vec![Appointment::new(
+                String::from("The original appointment"),
+                AppointmentTime::new(9, 23).unwrap()
+            )],
+            list.appointments()
+        );
+    }
+
+    #[test]
+    fn remove_should_be_ok() {
+        let reference_time = AppointmentTime::new(22, 7).unwrap();
+        let path = generate_path_for_test("remove_should_be_ok");
+        let mut list = AppointmentList::new(&reference_time, &path);
+
+        list.add(Appointment::new(
+            String::from("Appointment to be removed"),
+            AppointmentTime::new(23, 2).unwrap(),
+        ))
+        .unwrap();
+        list.add(Appointment::new(
+            String::from("This appointment should not be removed"),
+            AppointmentTime::new(22, 55).unwrap(),
+        ))
+        .unwrap();
+
+        list.remove(AppointmentTime::new(23, 2).unwrap())
+            .expect("Failed to remove appointment by time");
+
+        assert_eq!(
+            &vec![Appointment::new(
+                String::from("This appointment should not be removed"),
+                AppointmentTime::new(22, 55).unwrap()
+            )],
+            list.appointments()
         );
     }
 }
