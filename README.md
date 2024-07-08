@@ -96,6 +96,10 @@ docker run --rm -it \
     ghcr.io/vncsmyrnk/rust-dev:latest bash
 ```
 
+### Documentation
+
+Go to [docs](https://vncsmyrnk.github.io/todayiwill/) for checking out the code documentation.
+
 ### Dev Tools
 
 Once inside the container, you can run `$ sudo -E ./dev-setup.sh` to install dev dependencies like `git` and `nvim`.

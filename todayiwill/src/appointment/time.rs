@@ -8,6 +8,7 @@ use chrono::Local;
 
 use super::helper;
 
+/// Describe the time for an appointment
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AppointmentTime {
     hour: i32,
@@ -15,6 +16,17 @@ pub struct AppointmentTime {
 }
 
 impl AppointmentTime {
+    /// Returns a result for `AppointmentTime`. Validates and returns an `Err` if hours are not between
+    /// 0 and 23 (including) and minutes are not between 0 and 59 (including)
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::AppointmentTime;
+    ///
+    /// let time = AppointmentTime::new(22, 48).unwrap();
+    /// assert_eq!("22:48", time.to_string());
+    /// ```
     pub fn new(hour: i32, minutes: i32) -> Result<Self, String> {
         if !(0..24).contains(&hour) {
             return Err(String::from("Hour should be between 0 and 23"));
@@ -25,6 +37,17 @@ impl AppointmentTime {
         Ok(Self { hour, minutes })
     }
 
+    /// Returns the AppointmentTime for the system time
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::AppointmentTime;
+    /// use chrono::Local;
+    ///
+    /// let now = AppointmentTime::now();
+    /// assert_eq!(Local::now().format("%H:%M").to_string(), now.to_string());
+    /// ```
     pub fn now() -> Self {
         let now = Local::now();
         Self {
@@ -33,10 +56,31 @@ impl AppointmentTime {
         }
     }
 
-    pub fn is_equal_or_past_from(&self, appointment_time: &AppointmentTime) -> bool {
+    /// Checks if the current time is earlier or equal to a reference to another AppointmentTime
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::AppointmentTime;
+    ///
+    /// let time_1 = AppointmentTime::new(3, 50).unwrap();
+    /// let time_2 = AppointmentTime::new(18, 0).unwrap();
+    /// assert!(time_1.is_equal_or_earlier_than(&time_2));
+    /// ```
+    pub fn is_equal_or_earlier_than(&self, appointment_time: &AppointmentTime) -> bool {
         self <= appointment_time
     }
 
+    /// Creates an `AppointmentTime` from a string slice
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::AppointmentTime;
+    ///
+    /// let time = AppointmentTime::from("07:04").unwrap();
+    /// assert_eq!(AppointmentTime::new(7, 4).unwrap(), time);
+    /// ```
     pub fn from(time: &str) -> Result<Self, String> {
         let (hour, minutes) = match helper::parse_time(time) {
             Some((hour, minutes)) => (hour, minutes),
@@ -46,6 +90,15 @@ impl AppointmentTime {
         Ok(appointment_time)
     }
 
+    /// Returns the maximum possible value for an `AppointmentTime`
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::AppointmentTime;
+    ///
+    /// assert_eq!(AppointmentTime::new(23, 59).unwrap(), AppointmentTime::max_value());
+    /// ```
     pub fn max_value() -> Self {
         Self {
             hour: 23,
@@ -53,6 +106,15 @@ impl AppointmentTime {
         }
     }
 
+    /// Returns the minimum possible value for an `AppointmentTime`
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::AppointmentTime;
+    ///
+    /// assert_eq!(AppointmentTime::new(0, 0).unwrap(), AppointmentTime::min_value());
+    /// ```
     pub fn min_value() -> Self {
         Self {
             hour: 0,
@@ -257,18 +319,18 @@ mod tests {
     #[test]
     fn appointment_time_should_be_passed() {
         let future_appointment_time = AppointmentTime::now() + 5;
-        assert!(!future_appointment_time.is_equal_or_past_from(&AppointmentTime::now()))
+        assert!(!future_appointment_time.is_equal_or_earlier_than(&AppointmentTime::now()))
     }
 
     #[test]
     fn appointment_time_should_not_be_passed() {
         let future_appointment_time = AppointmentTime::now() - 5;
-        assert!(future_appointment_time.is_equal_or_past_from(&AppointmentTime::now()))
+        assert!(future_appointment_time.is_equal_or_earlier_than(&AppointmentTime::now()))
     }
 
     #[test]
     fn appointment_time_should_be_passed_edge_case() {
         let future_appointment_time = AppointmentTime::now();
-        assert!(future_appointment_time.is_equal_or_past_from(&AppointmentTime::now()))
+        assert!(future_appointment_time.is_equal_or_earlier_than(&AppointmentTime::now()))
     }
 }

@@ -10,6 +10,7 @@ pub mod time;
 
 use time::AppointmentTime;
 
+/// Describe an appointment
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Appointment {
     time: AppointmentTime,
@@ -17,10 +18,30 @@ pub struct Appointment {
 }
 
 impl Appointment {
+    /// Returns a new `Appointment`
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentTime};
+    ///
+    /// let appointment = Appointment::new(String::from("A description"), AppointmentTime::new(9, 30).unwrap());
+    /// assert_eq!("09:30 A description", appointment.to_string());
+    /// ```
     pub fn new(description: String, time: AppointmentTime) -> Self {
         Self { description, time }
     }
 
+    /// Creates an `Appointment` from a string slice
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentTime};
+    ///
+    /// let appointment = Appointment::from("15:06 Visit parents").unwrap();
+    /// assert_eq!(Appointment::new(String::from("Visit parents"), AppointmentTime::new(15, 6).unwrap()), appointment);
+    /// ```
     pub fn from(appointment: &str) -> Result<Self, String> {
         let time: String = appointment.chars().take(5).collect();
         let appointment_time = AppointmentTime::from(&time)?;
@@ -28,13 +49,35 @@ impl Appointment {
         Ok(Appointment::new(description, appointment_time))
     }
 
-    pub fn is_equal_or_past_from(&self, appointment_time: &AppointmentTime) -> bool {
-        self.time.is_equal_or_past_from(appointment_time)
+    /// Checks if the current time is earlier or equal to a reference to another AppointmentTime
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentTime};
+    ///
+    /// let appointment = Appointment::new(String::from("Appointment 1"), AppointmentTime::new(9, 56).unwrap());
+    /// assert!(appointment.is_equal_or_earlier_than(&AppointmentTime::new(16, 3).unwrap()));
+    /// ```
+    pub fn is_equal_or_earlier_than(&self, appointment_time: &AppointmentTime) -> bool {
+        self.time.is_equal_or_earlier_than(appointment_time)
     }
 
+    /// Return a string version of the `Appointment` for displaying to the user. If the time of the
+    /// current appointment is earlier or equal to the reference time informed, the string is
+    /// returned with a `strikethrough`
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentTime};
+    ///
+    /// let appointment = Appointment::new(String::from("A complete description"), AppointmentTime::new(10, 29).unwrap());
+    /// assert_eq!("[10:29] A complete description", appointment.to_string_display(&AppointmentTime::new(9, 24).unwrap()));
+    /// ```
     pub fn to_string_display(&self, ref_time: &AppointmentTime) -> String {
         let display = format!("[{}] {}", self.time, self.description);
-        if self.is_equal_or_past_from(ref_time) {
+        if self.is_equal_or_earlier_than(ref_time) {
             display.strikethrough().to_string()
         } else {
             display
@@ -186,7 +229,7 @@ mod tests {
             String::from("Some future appointment"),
             AppointmentTime::now() + 5,
         );
-        assert!(!future_appointment.is_equal_or_past_from(&AppointmentTime::now()))
+        assert!(!future_appointment.is_equal_or_earlier_than(&AppointmentTime::now()))
     }
 
     #[test]
@@ -195,6 +238,6 @@ mod tests {
             String::from("Some past appointment"),
             AppointmentTime::now() - 5,
         );
-        assert!(future_appointment.is_equal_or_past_from(&AppointmentTime::now()))
+        assert!(future_appointment.is_equal_or_earlier_than(&AppointmentTime::now()))
     }
 }

@@ -9,11 +9,13 @@ use crate::appointment::AppointmentTime;
 
 use super::Appointment;
 
-pub enum ListOptions {
+/// Describe the filter options available for filtering appointments
+pub enum FilterOption {
     ByReferenceTime,
     ByReferenceAndExpireTime(i32),
 }
 
+/// Describe a list of appointments
 pub struct AppointmentList<'a> {
     reference_time: &'a AppointmentTime,
     path: &'a PathBuf,
@@ -21,6 +23,20 @@ pub struct AppointmentList<'a> {
 }
 
 impl<'a> AppointmentList<'a> {
+    /// Initialize a list. The appointments will be loaded from the path informed. Subsequent
+    /// operations will consider the same path
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentList, AppointmentTime};
+    /// use std::path::PathBuf;
+    ///
+    /// let reference_time = AppointmentTime::new(12, 45).unwrap();
+    /// let path = PathBuf::from("/tmp").join("todayiwill").join("appointments.txt");
+    /// let list = AppointmentList::new(&reference_time, &path);
+    /// assert_eq!(&Vec::<Appointment>::new(), list.appointments());
+    /// ```
     pub fn new(reference_time: &'a AppointmentTime, path: &'a PathBuf) -> Self {
         let mut new_appointment = Self {
             reference_time,
@@ -31,14 +47,58 @@ impl<'a> AppointmentList<'a> {
         new_appointment
     }
 
+    /// Returns a reference of the current state of appontments
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentList, AppointmentTime};
+    /// use std::path::PathBuf;
+    ///
+    /// let reference_time = AppointmentTime::new(1, 50).unwrap();
+    /// let path = PathBuf::from("/tmp").join("todayiwill").join("appointments.txt");
+    /// let list = AppointmentList::new(&reference_time, &path);
+    /// assert_eq!(&Vec::<Appointment>::new(), list.appointments());
+    /// ```
     pub fn appointments(&self) -> &Vec<Appointment> {
         &self.appointments
     }
 
+    /// Returns if the vector of appointments is currently empty
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentList, AppointmentTime};
+    /// use std::path::PathBuf;
+    ///
+    /// let reference_time = AppointmentTime::new(18, 24).unwrap();
+    /// let path = PathBuf::from("/tmp").join("todayiwill").join("appointments.txt");
+    /// let list = AppointmentList::new(&reference_time, &path);
+    /// assert!(list.no_appointments());
+    /// ```
     pub fn no_appointments(&self) -> bool {
         self.appointments.is_empty()
     }
 
+    /// Reads the current path and fill the appointments vector. It is automatically done at
+    /// AppointmentList instantiation
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentList, AppointmentTime};
+    /// use std::{fs, fs::File, io::Write, path::PathBuf};
+    ///
+    /// let path = PathBuf::from("/tmp").join("todayiwill").join("appointments_test_load.txt");
+    /// fs::create_dir_all(path.parent().unwrap()).expect("Failed to create test dir");
+    /// let mut file = File::create(path.to_str().unwrap()).expect("Failed to create test file");
+    /// file.write_all(b"07:45 Example appointment").expect("Failed to write to test file");
+    ///
+    /// let reference_time = AppointmentTime::now();
+    /// let list = AppointmentList::new(&reference_time, &path);
+    /// assert_eq!(&vec![Appointment::new(String::from("Example appointment"), AppointmentTime::new(7, 45).unwrap())], list.appointments());
+    /// ```
     pub fn load(&mut self) -> &Self {
         let file_result = fs::read_to_string(self.path);
         let file_content = match file_result {
@@ -52,6 +112,26 @@ impl<'a> AppointmentList<'a> {
         self
     }
 
+    /// Add an appointment to the list and the file
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentList, AppointmentTime};
+    /// use std::{fs, path::PathBuf};
+    ///
+    /// let path = PathBuf::from("/tmp").join("todayiwill").join("appointments_test_add.txt");
+    /// fs::create_dir_all(path.parent().unwrap()).expect("Failed to create test dir");
+    /// if path.exists() {
+    ///     fs::remove_file(&path).expect("Failed to clean test file");
+    /// }
+    ///
+    /// let reference_time = AppointmentTime::now();
+    /// let mut list = AppointmentList::new(&reference_time, &path);
+    /// list.add(Appointment::new(String::from("New appointment"), AppointmentTime::new(14, 8).unwrap())).unwrap();
+    /// assert_eq!(&vec![Appointment::new(String::from("New appointment"), AppointmentTime::new(14, 8).unwrap())], list.appointments());
+    /// assert_eq!("14:08 New appointment\n", fs::read_to_string(&path).expect("Failed to read file content"));
+    /// ```
     pub fn add(&mut self, appointment: Appointment) -> Result<(), String> {
         self.appointments.retain(|a| a.time != appointment.time);
         self.appointments.push(appointment);
@@ -60,10 +140,32 @@ impl<'a> AppointmentList<'a> {
         Ok(())
     }
 
+    /// Removes an appointment from the list and the file
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentList, AppointmentTime};
+    /// use std::{fs, path::PathBuf};
+    ///
+    /// let path = PathBuf::from("/tmp").join("todayiwill").join("appointments_test_remove.txt");
+    /// fs::create_dir_all(path.parent().unwrap()).expect("Failed to create test dir");
+    /// if path.exists() {
+    ///     fs::remove_file(&path).expect("Failed to clean test file");
+    /// }
+    ///
+    /// let reference_time = AppointmentTime::now();
+    /// let mut list = AppointmentList::new(&reference_time, &path);
+    /// list.add(Appointment::new(String::from("New appointment"), AppointmentTime::new(5, 32).unwrap()));
+    /// list.add(Appointment::new(String::from("Other appointment"), AppointmentTime::new(22, 48).unwrap()));
+    /// list.remove(AppointmentTime::new(22, 48).unwrap()).unwrap();
+    /// assert_eq!(&vec![Appointment::new(String::from("New appointment"), AppointmentTime::new(5, 32).unwrap())], list.appointments());
+    /// assert_eq!("05:32 New appointment\n", fs::read_to_string(&path).expect("Failed to read file content"));
+    /// ```
     pub fn remove(&mut self, time: AppointmentTime) -> Result<(), String> {
         match self.appointments.iter().position(|a| a.time == time) {
             Some(index) => {
-                if self.appointments[index].is_equal_or_past_from(self.reference_time) {
+                if self.appointments[index].is_equal_or_earlier_than(self.reference_time) {
                     return Err(String::from(
                         "This appointment is already past and cannot be removed.",
                     ));
@@ -80,6 +182,28 @@ impl<'a> AppointmentList<'a> {
         Ok(())
     }
 
+    /// Write the current state of appointments to the path. It is automaically done in some
+    /// operations
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentList, AppointmentTime};
+    /// use std::{fs, path::PathBuf};
+    ///
+    /// let path = PathBuf::from("/tmp").join("todayiwill").join("appointments_test_write.txt");
+    /// fs::create_dir_all(path.parent().unwrap()).expect("Failed to create test dir");
+    /// if path.exists() {
+    ///     fs::remove_file(&path).expect("Failed to clean test file");
+    /// }
+    ///
+    /// let reference_time = AppointmentTime::now();
+    /// let mut list = AppointmentList::new(&reference_time, &path);
+    /// list.add(Appointment::new(String::from("New appointment"), AppointmentTime::new(5, 32).unwrap()));
+    /// list.add(Appointment::new(String::from("Other appointment"), AppointmentTime::new(22, 48).unwrap()));
+    /// list.write().unwrap();
+    /// assert_eq!("05:32 New appointment\n22:48 Other appointment\n", fs::read_to_string(&path).expect("Failed to read file content"));
+    /// ```
     pub fn write(&self) -> Result<(), String> {
         match self.write_to_file() {
             Ok(..) => Ok(()),
@@ -90,13 +214,35 @@ impl<'a> AppointmentList<'a> {
         }
     }
 
-    pub fn filter(&mut self, options: ListOptions) -> &Self {
+    /// Applies a filter type and overrides the appointment vector. The filter possibilities are
+    /// defined in `FilterOption`
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentList, AppointmentTime, FilterOption};
+    /// use std::{fs, path::PathBuf};
+    ///
+    /// let path = PathBuf::from("/tmp").join("todayiwill").join("appointments_test_filter.txt");
+    /// fs::create_dir_all(path.parent().unwrap()).expect("Failed to create test dir");
+    /// if path.exists() {
+    ///     fs::remove_file(&path).expect("Failed to clean test file");
+    /// }
+    ///
+    /// let reference_time = AppointmentTime::new(18, 54).unwrap();
+    /// let mut list = AppointmentList::new(&reference_time, &path);
+    /// list.add(Appointment::new(String::from("New appointment"), AppointmentTime::new(18, 56).unwrap()));
+    /// list.add(Appointment::new(String::from("Other appointment"), AppointmentTime::new(10, 2).unwrap()));
+    /// list.filter(FilterOption::ByReferenceAndExpireTime(5));
+    /// assert_eq!(&vec![Appointment::new(String::from("New appointment"), AppointmentTime::new(18, 56).unwrap())], list.appointments());
+    /// ```
+    pub fn filter(&mut self, options: FilterOption) -> &Self {
         let filter_by_reference_time = |a: &Appointment| a.time > *self.reference_time;
         match options {
-            ListOptions::ByReferenceTime => {
+            FilterOption::ByReferenceTime => {
                 self.appointments.retain(filter_by_reference_time);
             }
-            ListOptions::ByReferenceAndExpireTime(expire_in_seconds) => {
+            FilterOption::ByReferenceAndExpireTime(expire_in_seconds) => {
                 self.appointments.retain(filter_by_reference_time);
                 self.appointments
                     .retain(|a| a.time <= self.reference_time.clone() + expire_in_seconds);
@@ -105,6 +251,33 @@ impl<'a> AppointmentList<'a> {
         self
     }
 
+    /// Copies the appointments created in another day to the current day
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentList, AppointmentTime};
+    /// use std::{fs, fs::File, io::Write, path::PathBuf};
+    ///
+    /// let path_origin = PathBuf::from("/tmp").join("todayiwill").join("appointments_test_copy_origin.txt");
+    /// fs::create_dir_all(path_origin.parent().unwrap()).expect("Failed to create test dir");
+    /// if path_origin.exists() {
+    ///     fs::remove_file(&path_origin).expect("Failed to clean test file");
+    /// }
+    /// let mut file = File::create(path_origin.to_str().unwrap()).expect("Failed to create test file");
+    /// file.write_all(b"15:58 Example appointment").expect("Failed to write to test file");
+    ///
+    /// let path_dest = PathBuf::from("/tmp").join("todayiwill").join("appointments_test_copy_destination.txt");
+    /// if path_dest.exists() {
+    ///     fs::remove_file(&path_dest).expect("Failed to clean test file");
+    /// }
+    ///
+    /// let reference_time = AppointmentTime::now();
+    /// let mut list = AppointmentList::new(&reference_time, &path_dest);
+    /// assert!(list.no_appointments());
+    /// list.copy(&path_origin).unwrap();
+    /// assert_eq!(&vec![Appointment::new(String::from("Example appointment"), AppointmentTime::new(15, 58).unwrap())], list.appointments());
+    /// ```
     pub fn copy(&mut self, from: &PathBuf) -> Result<(), String> {
         if !self.appointments.is_empty() {
             return Err(String::from(
@@ -126,6 +299,25 @@ impl<'a> AppointmentList<'a> {
         }
     }
 
+    /// Clears the appointments added for the current day
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentList, AppointmentTime};
+    /// use std::{fs, fs::File, io::Write, path::PathBuf};
+    ///
+    /// let path = PathBuf::from("/tmp").join("todayiwill").join("appointments_test_clear.txt");
+    /// fs::create_dir_all(path.parent().unwrap()).expect("Failed to create test dir");
+    /// let mut file = File::create(path.to_str().unwrap()).expect("Failed to create test file");
+    /// file.write_all(b"22:15 Example appointment").expect("Failed to write to test file");
+    ///
+    /// let reference_time = AppointmentTime::now();
+    /// let mut list = AppointmentList::new(&reference_time, &path);
+    /// assert_eq!(&vec![Appointment::new(String::from("Example appointment"), AppointmentTime::new(22, 15).unwrap())], list.appointments());
+    /// list.clear().unwrap();
+    /// assert!(list.no_appointments());
+    /// ```
     pub fn clear(&mut self) -> Result<(), String> {
         self.appointments = vec![];
         match fs::remove_file(self.path) {
@@ -137,6 +329,7 @@ impl<'a> AppointmentList<'a> {
         }
     }
 
+    /// Writes the appointments vector in the path supplied
     fn write_to_file(&self) -> Result<(), io::Error> {
         fs::create_dir_all(self.path.parent().unwrap())?;
         let file = File::create(self.path)?;
@@ -166,7 +359,7 @@ mod tests {
     use std::{fs, fs::File, io::Write, path::PathBuf};
 
     use crate::appointment::{
-        list::{AppointmentList, ListOptions},
+        list::{AppointmentList, FilterOption},
         Appointment, AppointmentTime,
     };
 
@@ -190,7 +383,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_file_contents() {
+    fn parse_and_load_file_content_should_be_ok() {
         let test_file_path = PathBuf::from("/tmp")
             .join("todayilearn-test-list")
             .join("appointments.txt");
@@ -220,7 +413,7 @@ mod tests {
     }
 
     #[test]
-    fn parse_file_non_existent() {
+    fn non_existent_file_should_be_parsed_as_empty_vec() {
         let test_file_path = PathBuf::from("/tmp/non_existent.txt");
         let reference_time = AppointmentTime::now();
         let list = AppointmentList::new(&reference_time, &test_file_path);
@@ -250,13 +443,13 @@ mod tests {
     }
 
     #[test]
-    fn filter_should_retain_by_time() {
-        let path = generate_path_for_test("filter_should_retain_by_time");
+    fn filter_should_retain_by_reference_time() {
+        let path = generate_path_for_test("filter_should_retain_by_reference_time");
         let reference_time = AppointmentTime::new(7, 29).unwrap();
         let mut list = AppointmentList::new(&reference_time, &path);
         list.add(Appointment::new(
             String::from("Close the windows"),
-            AppointmentTime::new(6, 20).unwrap(),
+            AppointmentTime::new(7, 29).unwrap(),
         ))
         .unwrap();
         list.add(Appointment::new(
@@ -266,22 +459,52 @@ mod tests {
         .unwrap();
         list.add(Appointment::new(
             String::from("Check the news"),
-            AppointmentTime::new(8, 0).unwrap(),
+            AppointmentTime::new(7, 30).unwrap(),
         ))
         .unwrap();
-        let reference_time = AppointmentTime::new(7, 34).unwrap();
-        let mut list = AppointmentList::new(&reference_time, &path);
+
         assert_eq!(
             &vec![Appointment::new(
                 String::from("Check the news"),
-                AppointmentTime::new(8, 0).unwrap(),
+                AppointmentTime::new(7, 30).unwrap(),
             ),],
-            list.filter(ListOptions::ByReferenceTime).appointments()
+            list.filter(FilterOption::ByReferenceTime).appointments()
         );
     }
 
     #[test]
-    fn appointments_write_to_file() {
+    fn filter_should_retain_by_reference_and_expire_time() {
+        let path = generate_path_for_test("filter_should_retain_by_reference_and_expire_time");
+        let reference_time = AppointmentTime::new(16, 23).unwrap();
+        let mut list = AppointmentList::new(&reference_time, &path);
+        list.add(Appointment::new(
+            String::from("Format pc"),
+            AppointmentTime::new(18, 1).unwrap(),
+        ))
+        .unwrap();
+        list.add(Appointment::new(
+            String::from("Do the laundry"),
+            AppointmentTime::new(16, 28).unwrap(),
+        ))
+        .unwrap();
+        list.add(Appointment::new(
+            String::from("Check the news"),
+            AppointmentTime::new(16, 29).unwrap(),
+        ))
+        .unwrap();
+
+        assert_eq!(
+            &vec![Appointment::new(
+                String::from("Do the laundry"),
+                AppointmentTime::new(16, 28).unwrap(),
+            ),],
+            list.filter(FilterOption::ByReferenceAndExpireTime(5))
+                .appointments()
+        );
+    }
+
+    #[test]
+    fn writing_appointments_to_file_should_be_ok() {
         let path = PathBuf::from("/tmp")
             .join("todayilearn-test-add")
             .join("test_file.txt");
@@ -305,9 +528,37 @@ mod tests {
             AppointmentTime::new(16, 56).unwrap(),
         ))
         .unwrap();
+
+        list.add(Appointment::new(
+            String::from("Clean kitchen floor"),
+            AppointmentTime::new(20, 45).unwrap(),
+        ))
+        .unwrap();
+
         list.write().expect("Failed to write appointments on file");
-        let file_result = fs::read_to_string(&path).expect("Failed to read file content");
-        assert_eq!("15:46 Call aunt Anna\n16:56 Buy new cup\n", file_result);
+
+        assert_eq!(
+            "15:46 Call aunt Anna\n16:56 Buy new cup\n20:45 Clean kitchen floor\n",
+            fs::read_to_string(&path).expect("Failed to read file content")
+        );
+
+        list.remove(AppointmentTime::new(16, 56).unwrap()).unwrap();
+
+        assert_eq!(
+            "15:46 Call aunt Anna\n20:45 Clean kitchen floor\n",
+            fs::read_to_string(&path).expect("Failed to read file content")
+        );
+
+        list.add(Appointment::new(
+            String::from("Appointment to override existent"),
+            AppointmentTime::new(15, 46).unwrap(),
+        ))
+        .unwrap();
+
+        assert_eq!(
+            "15:46 Appointment to override existent\n20:45 Clean kitchen floor\n",
+            fs::read_to_string(&path).expect("Failed to read file content")
+        );
     }
 
     #[test]
@@ -322,10 +573,23 @@ mod tests {
             AppointmentTime::new(10, 43).unwrap(),
         ))
         .expect("Failed to add a new appointment to the list");
-        let file_content = fs::read_to_string(&path).expect("Failed to read file content");
+
         assert_eq!(
-            "09:15 Wash the dishes\n10:43 Visit cousin Frank\n15:30 Go to the bank\n",
-            file_content
+            &vec![
+                Appointment::new(
+                    String::from("Wash the dishes"),
+                    AppointmentTime::new(9, 15).unwrap()
+                ),
+                Appointment::new(
+                    String::from("Visit cousin Frank"),
+                    AppointmentTime::new(10, 43).unwrap()
+                ),
+                Appointment::new(
+                    String::from("Go to the bank"),
+                    AppointmentTime::new(15, 30).unwrap()
+                )
+            ],
+            list.appointments()
         );
     }
 
@@ -397,6 +661,55 @@ mod tests {
                 "[19:17] Update my professional portfolio"
             ),
             list.to_string()
+        );
+    }
+
+    #[test]
+    fn copy_should_be_ok() {
+        let path_origin = generate_path_for_test("copy_should_be_ok_origin");
+        write_to_path(&path_origin, b"09:23 The original appointment");
+
+        let reference_time = AppointmentTime::new(12, 46).unwrap();
+        let path_dist = generate_path_for_test("copy_should_be_ok_dist");
+        let mut list = AppointmentList::new(&reference_time, &path_dist);
+        assert!(list.no_appointments());
+
+        list.copy(&path_origin).unwrap();
+        assert_eq!(
+            &vec![Appointment::new(
+                String::from("The original appointment"),
+                AppointmentTime::new(9, 23).unwrap()
+            )],
+            list.appointments()
+        );
+    }
+
+    #[test]
+    fn remove_should_be_ok() {
+        let reference_time = AppointmentTime::new(22, 7).unwrap();
+        let path = generate_path_for_test("remove_should_be_ok");
+        let mut list = AppointmentList::new(&reference_time, &path);
+
+        list.add(Appointment::new(
+            String::from("Appointment to be removed"),
+            AppointmentTime::new(23, 2).unwrap(),
+        ))
+        .unwrap();
+        list.add(Appointment::new(
+            String::from("This appointment should not be removed"),
+            AppointmentTime::new(22, 55).unwrap(),
+        ))
+        .unwrap();
+
+        list.remove(AppointmentTime::new(23, 2).unwrap())
+            .expect("Failed to remove appointment by time");
+
+        assert_eq!(
+            &vec![Appointment::new(
+                String::from("This appointment should not be removed"),
+                AppointmentTime::new(22, 55).unwrap()
+            )],
+            list.appointments()
         );
     }
 }

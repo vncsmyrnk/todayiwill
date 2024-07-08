@@ -7,7 +7,7 @@ extern crate chrono;
 extern crate dirs;
 
 use colored::Colorize;
-use todayiwill::{helper, Appointment, AppointmentList, AppointmentTime, Config, ListOptions};
+use todayiwill::{helper, Appointment, AppointmentList, AppointmentTime, Config, FilterOption};
 
 /// A CLI for remembering what you need to do today
 #[derive(Debug, Parser)]
@@ -103,7 +103,7 @@ fn parse_input() -> Result<(), String> {
                 ),
             };
 
-            if appointment.is_equal_or_past_from(&current_time) {
+            if appointment.is_equal_or_earlier_than(&current_time) {
                 return Err(String::from("Given time already passed."));
             }
 
@@ -131,8 +131,8 @@ fn parse_input() -> Result<(), String> {
 
             if !all {
                 match expire_in {
-                    None => list.filter(ListOptions::ByReferenceTime),
-                    Some(value) => list.filter(ListOptions::ByReferenceAndExpireTime(value)),
+                    None => list.filter(FilterOption::ByReferenceTime),
+                    Some(value) => list.filter(FilterOption::ByReferenceAndExpireTime(value)),
                 };
             }
 
