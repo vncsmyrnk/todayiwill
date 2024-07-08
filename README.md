@@ -10,6 +10,8 @@
 
 A CLI reminder app that offers a simple yet powerful solution to enhance productivity and ensure that you stay on top of your daily responsibilities. Unlike complex project management tools, a CLI app provides a lightweight and straightforward interface that integrates seamlessly into the workflows of developers, system administrators, and tech-savvy users who spend a significant portion of their day in the terminal.
 
+![gif showing the installation process](https://raw.githubusercontent.com/vncsmyrnk/todayiwill/main/assets/install.gif)
+
 ## 🚀 Examples
 
 ### Documentation
