@@ -18,7 +18,7 @@ pub struct Appointment {
 }
 
 impl Appointment {
-    /// Returns a new appointment
+    /// Returns a new `Appointment`
     ///
     /// # Example
     ///
@@ -32,7 +32,7 @@ impl Appointment {
         Self { description, time }
     }
 
-    /// Creates an appointment by a string slice
+    /// Creates an `Appointment` from a string slice
     ///
     /// # Example
     ///
@@ -49,7 +49,7 @@ impl Appointment {
         Ok(Appointment::new(description, appointment_time))
     }
 
-    /// Checks if the current time if past or equal to a reference to an AppointmentTime
+    /// Checks if the current time is earlier or equal to a reference to another AppointmentTime
     ///
     /// # Example
     ///
@@ -63,6 +63,18 @@ impl Appointment {
         self.time.is_equal_or_earlier_than(appointment_time)
     }
 
+    /// Return a string version of the `Appointment` for displaying to the user. If the time of the
+    /// current appointment is earlier or equal to the reference time informed, the string is
+    /// returned with a `strikethrough`
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use todayiwill::{Appointment, AppointmentTime};
+    ///
+    /// let appointment = Appointment::new(String::from("A complete description"), AppointmentTime::new(10, 29).unwrap());
+    /// assert_eq!("[10:29] A complete description", appointment.to_string_display(&AppointmentTime::new(9, 24).unwrap()));
+    /// ```
     pub fn to_string_display(&self, ref_time: &AppointmentTime) -> String {
         let display = format!("[{}] {}", self.time, self.description);
         if self.is_equal_or_earlier_than(ref_time) {
