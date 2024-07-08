@@ -63,7 +63,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Download build artifact
-        id: download-artifact
+        id: download-build-artifact
         uses: actions/download-artifact@v4
         with:
           name: artifacts
@@ -73,7 +73,7 @@ jobs:
         run: ls ./artifacts/**/*
 
       - name: Download documentation artifact
-        id: download-artifact
+        id: download-documentation-artifact
         uses: actions/download-artifact@v4
         with:
           name: documentation
