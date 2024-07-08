@@ -7,7 +7,7 @@ extern crate chrono;
 extern crate dirs;
 
 use colored::Colorize;
-use todayiwill::{helper, Appointment, AppointmentList, AppointmentTime, Config, FilterOptions};
+use todayiwill::{helper, Appointment, AppointmentList, AppointmentTime, Config, FilterOption};
 
 /// A CLI for remembering what you need to do today
 #[derive(Debug, Parser)]
@@ -131,8 +131,8 @@ fn parse_input() -> Result<(), String> {
 
             if !all {
                 match expire_in {
-                    None => list.filter(FilterOptions::ByReferenceTime),
-                    Some(value) => list.filter(FilterOptions::ByReferenceAndExpireTime(value)),
+                    None => list.filter(FilterOption::ByReferenceTime),
+                    Some(value) => list.filter(FilterOption::ByReferenceAndExpireTime(value)),
                 };
             }
 
