@@ -38,6 +38,9 @@ jobs:
       - name: Build doc
         run: cargo doc --no-deps
 
+      - name: Add redirect
+        run: echo '<meta http-equiv="refresh" content="0;url=todayiwill/index.html">' > target/doc/index.html
+
       - name: Upload Documentation
         uses: actions/upload-artifact@v4
         with:
@@ -59,6 +62,7 @@ jobs:
     permissions:
       pages: write
       id-token: write
+      contents: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
