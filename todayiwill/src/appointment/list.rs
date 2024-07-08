@@ -329,6 +329,7 @@ impl<'a> AppointmentList<'a> {
         }
     }
 
+    /// Writes the appointments vector in the path supplied
     fn write_to_file(&self) -> Result<(), io::Error> {
         fs::create_dir_all(self.path.parent().unwrap())?;
         let file = File::create(self.path)?;
