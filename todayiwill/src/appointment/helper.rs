@@ -22,8 +22,9 @@ impl Config {
     /// use chrono::{Local, NaiveDate};
     ///
     /// let config = Config::standard();
-    /// assert_eq!(PathBuf::from(format!("/home/{}/.local/share/todayiwill/appointments_01012024.txt", whoami::username())), (config.appointment_file_path_builder)(NaiveDate::from_ymd_opt(2024, 1, 1).unwrap()));
-    /// assert_eq!(PathBuf::from(format!("/home/{}/.local/share/todayiwill/appointments_{}.txt", whoami::username(), Local::now().format("%d%m%Y"))), *config.appointment_file_path_current_day);
+    /// let data_path = dirs::data_dir().unwrap();
+    /// assert_eq!(PathBuf::from(format!("{}/todayiwill/appointments_01012024.txt", data_path.to_str().unwrap())), (config.appointment_file_path_builder)(NaiveDate::from_ymd_opt(2024, 1, 1).unwrap()));
+    /// assert_eq!(PathBuf::from(format!("{}/todayiwill/appointments_{}.txt", data_path.to_str().unwrap(), Local::now().format("%d%m%Y"))), *config.appointment_file_path_current_day);
     /// ```
     pub fn standard() -> Self {
         let appointment_path_builder = |date: NaiveDate| {
