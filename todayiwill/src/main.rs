@@ -103,7 +103,7 @@ fn parse_input() -> Result<(), String> {
                 ),
             };
 
-            if appointment.is_equal_or_past_from(&current_time) {
+            if appointment.is_equal_or_earlier_than(&current_time) {
                 return Err(String::from("Given time already passed."));
             }
 

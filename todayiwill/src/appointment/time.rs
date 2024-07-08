@@ -33,7 +33,7 @@ impl AppointmentTime {
         }
     }
 
-    pub fn is_equal_or_past_from(&self, appointment_time: &AppointmentTime) -> bool {
+    pub fn is_equal_or_earlier_than(&self, appointment_time: &AppointmentTime) -> bool {
         self <= appointment_time
     }
 
@@ -257,18 +257,18 @@ mod tests {
     #[test]
     fn appointment_time_should_be_passed() {
         let future_appointment_time = AppointmentTime::now() + 5;
-        assert!(!future_appointment_time.is_equal_or_past_from(&AppointmentTime::now()))
+        assert!(!future_appointment_time.is_equal_or_earlier_than(&AppointmentTime::now()))
     }
 
     #[test]
     fn appointment_time_should_not_be_passed() {
         let future_appointment_time = AppointmentTime::now() - 5;
-        assert!(future_appointment_time.is_equal_or_past_from(&AppointmentTime::now()))
+        assert!(future_appointment_time.is_equal_or_earlier_than(&AppointmentTime::now()))
     }
 
     #[test]
     fn appointment_time_should_be_passed_edge_case() {
         let future_appointment_time = AppointmentTime::now();
-        assert!(future_appointment_time.is_equal_or_past_from(&AppointmentTime::now()))
+        assert!(future_appointment_time.is_equal_or_earlier_than(&AppointmentTime::now()))
     }
 }

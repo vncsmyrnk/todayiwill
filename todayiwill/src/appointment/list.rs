@@ -165,7 +165,7 @@ impl<'a> AppointmentList<'a> {
     pub fn remove(&mut self, time: AppointmentTime) -> Result<(), String> {
         match self.appointments.iter().position(|a| a.time == time) {
             Some(index) => {
-                if self.appointments[index].is_equal_or_past_from(self.reference_time) {
+                if self.appointments[index].is_equal_or_earlier_than(self.reference_time) {
                     return Err(String::from(
                         "This appointment is already past and cannot be removed.",
                     ));
