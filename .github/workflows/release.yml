@@ -15,10 +15,6 @@ jobs:
       matrix:
         platform: [ubuntu-22.04]
 
-    defaults:
-      run:
-        working-directory: ./todayiwill
-
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout
@@ -27,19 +23,14 @@ jobs:
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Set version
+      - name: Build
         run: |
           VERSION=${{ github.ref_name }}
-          sed -i "s/^version =.*/version = \"${VERSION:1}\"/g" Cargo.toml
-
-      - name: Build
-        run: cargo build --release
+          make VERSION=${VERSION:1} build
 
       - name: Build doc
-        run: cargo doc --no-deps
-
-      - name: Add redirect
-        run: echo '<meta http-equiv="refresh" content="0;url=todayiwill/index.html">' > target/doc/index.html
+        run: |
+          make build-doc
 
       - name: Upload Documentation
         uses: actions/upload-artifact@v4
@@ -47,12 +38,20 @@ jobs:
           name: documentation
           path: ./todayiwill/target/doc
 
+      - name: Build deb package
+        run: |
+          VERSION=${{ github.ref_name }}
+          sudo apt-get install ruby-dev build-essential
+          sudo gem install --no-document fpm
+          make VERSION=${VERSION:1} build-deb
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: artifacts
           path: |
             ./todayiwill/target/release
+            ./todayiwill_*.deb
             ./install-*
             ./uninstall-*
 

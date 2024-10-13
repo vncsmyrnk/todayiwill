@@ -66,10 +66,19 @@ $ todayiwill list
 
 ![gif showing the installation process](https://raw.githubusercontent.com/vncsmyrnk/todayiwill/main/assets/install.gif)
 
-### Ubuntu/debian
+All packages are made to `x86_64` architecture.
+
+### Ubuntu/debian (bash)
 
 ```bash
 bash <(wget -O- https://github.com/vncsmyrnk/todayiwill/releases/latest/download/install-linux-debian.sh 2> /dev/null)
+```
+
+### Ubuntu/debian (`deb` package)
+
+```bash
+curl -L -O https://github.com/vncsmyrnk/todayiwill/releases/latest/download/todayiwill_0.6.0_amd64.deb # or other version
+sudo apt install ./todayiwill_0.6.0_amd64.deb
 ```
 
 ### Homebrew
