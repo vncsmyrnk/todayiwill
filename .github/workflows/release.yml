@@ -29,7 +29,8 @@ jobs:
 
       - name: Set version
         run: |
-          VERSION=${{ github.ref_name }}
+          # VERSION=${{ github.ref_name }}
+          VERSION=0.0.0
           sed -i "s/^version =.*/version = \"${VERSION:1}\"/g" Cargo.toml
 
       - name: Build
