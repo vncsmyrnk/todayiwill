@@ -1,8 +1,10 @@
 build:
-	@sed -i "s/^version =.*/version = \"$(VERSION)\"/g" todayiwill/Cargo.toml
+	cd todayiwill
+	@sed -i "s/^version =.*/version = \"$(VERSION)\"/g" Cargo.toml
 	cargo build --release
 
 build-doc:
+	cd todayiwill
 	cargo doc --no-deps
 	@echo '<meta http-equiv="refresh" content="0;url=todayiwill/index.html">' > target/doc/index.html
 
