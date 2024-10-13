@@ -77,8 +77,8 @@ bash <(wget -O- https://github.com/vncsmyrnk/todayiwill/releases/latest/download
 ### Ubuntu/debian (`deb` package)
 
 ```bash
-curl  -L -O https://github.com/vncsmyrnk/todayiwill/releases/latest/download/todayiwill_0.6.0_amd64.deb # or other version
-sudo apt install todayiwill_0.6.0_amd64.deb
+curl -L -O https://github.com/vncsmyrnk/todayiwill/releases/latest/download/todayiwill_0.6.0_amd64.deb # or other version
+sudo apt install ./todayiwill_0.6.0_amd64.deb
 ```
 
 ### Homebrew
