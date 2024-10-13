@@ -1,12 +1,10 @@
 build:
-	cd todayiwill
-	@sed -i "s/^version =.*/version = \"$(VERSION)\"/g" Cargo.toml
-	cargo build --release
+	@sed -i "s/^version =.*/version = \"$(VERSION)\"/g" todayiwill/Cargo.toml
+	cd todayiwill && cargo build --release
 
 build-doc:
-	cd todayiwill
-	cargo doc --no-deps
-	@echo '<meta http-equiv="refresh" content="0;url=todayiwill/index.html">' > target/doc/index.html
+	cd todayiwill && cargo doc --no-deps
+	@echo '<meta http-equiv="refresh" content="0;url=todayiwill/index.html">' > todayiwill/target/doc/index.html
 
 build-deb:
 	fpm -s dir \
