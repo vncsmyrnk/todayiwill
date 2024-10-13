@@ -2,8 +2,8 @@ name: Release workflow
 
 on:
   push:
-    # tags:
-    #   - '*'
+    tags:
+      - '*'
 
 permissions:
   contents: write
