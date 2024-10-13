@@ -52,6 +52,7 @@ jobs:
           path: |
             ./todayiwill/target/release
             ./todayiwill_*.deb
+            ./PKGBUILD
             ./install-*
             ./uninstall-*
 
@@ -114,6 +115,7 @@ jobs:
             artifacts/todayiwill/target/release/todayiwill
             artifacts/PKGBUILD
             artifacts/install-*
+            artifacts/todayiwill_*.deb
             artifacts/uninstall-*
           body: |
             # Changelog
