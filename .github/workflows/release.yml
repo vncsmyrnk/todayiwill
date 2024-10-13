@@ -25,7 +25,8 @@ jobs:
 
       - name: Build
         run: |
-          make VERSION=0.0.0 build
+          VERSION=${{ github.ref_name }}
+          make VERSION=${VERSION:1} build
 
       - name: Build doc
         run: |
@@ -39,9 +40,10 @@ jobs:
 
       - name: Build deb package
         run: |
+          VERSION=${{ github.ref_name }}
           sudo apt-get install ruby-dev build-essential
           sudo gem install --no-document fpm
-          make VERSION=0.0.0 build-deb
+          make VERSION=${VERSION:1} build-deb
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
