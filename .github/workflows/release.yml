@@ -15,10 +15,6 @@ jobs:
       matrix:
         platform: [ubuntu-22.04]
 
-    defaults:
-      run:
-        working-directory: ./todayiwill
-
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout
