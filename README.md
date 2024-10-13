@@ -75,8 +75,8 @@ bash <(wget -O- https://github.com/vncsmyrnk/todayiwill/releases/latest/download
 ### Homebrew
 
 ```bash
-brew tap vncsmyrnk/todayiwill
-brew install todayiwill
+brew tap vncsmyrnk/todayiwill https://github.com/vncsmyrnk/todayiwill.git
+brew install vncsmyrnk/todayiwill/app
 ```
 
 ## 🪄 Coming soon...
