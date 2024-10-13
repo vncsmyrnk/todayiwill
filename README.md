@@ -79,6 +79,13 @@ brew tap vncsmyrnk/todayiwill https://github.com/vncsmyrnk/todayiwill.git
 brew install vncsmyrnk/todayiwill/app
 ```
 
+### Arch
+
+```bash
+curl  -L -O https://github.com/vncsmyrnk/todayiwill/releases/latest/download/PKGBUILD
+makepkg -si
+```
+
 ## 🪄 Coming soon...
 
 Check the [opened issues](https://github.com/vncsmyrnk/todayiwill/issues) section to know what will soon be available.
