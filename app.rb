@@ -4,6 +4,7 @@ class Todayiwill < Formula
   url "https://github.com/vncsmyrnk/todayiwill/releases/download/v0.5.3/todayiwill"
   sha256 "36f63e5b6ec2f5ecc0b30b9927ce5923bb09c3f268bdec277f5859ab7cbc3bc3"
   license "MIT"
+  version "0.5.3"
 
   def install
     bin.install "todayiwill"
