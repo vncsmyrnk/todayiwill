@@ -52,6 +52,7 @@ jobs:
           path: |
             ./todayiwill/target/release
             ./todayiwill_*.deb
+            ./PKGBUILD
             ./install-*
             ./uninstall-*
 
