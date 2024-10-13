@@ -11,7 +11,6 @@ build-deb:
 		-t deb \
 		-n todayiwill \
 		-v $(VERSION) \
-		--license glp3 \
 		--description "A CLI reminder app that offers a simple yet powerful solution to enhance productivity and ensure that you stay on top of your daily responsibilities" \
 		--maintainer "Vinicius Mayrink <vncsmyrnk@gmail.com>" \
 		target/release/todayiwill=/usr/bin/todayiwill
