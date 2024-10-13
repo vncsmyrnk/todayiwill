@@ -53,7 +53,7 @@ jobs:
           cd ..
           sudo apt-get install ruby-dev build-essential
           sudo gem install --no-document fpm
-          make build-deb
+          VERSION=0.0.0 make build-deb
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
