@@ -25,7 +25,7 @@ jobs:
 
       - name: Build
         run: |
-          make VERSION=v0.0.0 build
+          make VERSION=0.0.0 build
 
       - name: Build doc
         run: |
@@ -41,7 +41,7 @@ jobs:
         run: |
           sudo apt-get install ruby-dev build-essential
           sudo gem install --no-document fpm
-          make VERSION=v0.0.0 build-deb
+          make VERSION=0.0.0 build-deb
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
