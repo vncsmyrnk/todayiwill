@@ -61,5 +61,6 @@ jobs:
           name: artifacts
           path: |
             ./todayiwill/target/release
+            ./todayiwill_*.deb
             ./install-*
             ./uninstall-*
