@@ -72,6 +72,13 @@ $ todayiwill list
 bash <(wget -O- https://github.com/vncsmyrnk/todayiwill/releases/latest/download/install-linux-debian.sh 2> /dev/null)
 ```
 
+### Homebrew
+
+```bash
+brew tap vncsmyrnk/todayiwill
+brew install todayiwill
+```
+
 ## 🪄 Coming soon...
 
 Check the [opened issues](https://github.com/vncsmyrnk/todayiwill/issues) section to know what will soon be available.
