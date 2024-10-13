@@ -54,3 +54,68 @@ jobs:
             ./todayiwill_*.deb
             ./install-*
             ./uninstall-*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      contents: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download build artifact
+        id: download-build-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts
+          path: artifacts
+
+      - name: List build artifacts generated
+        run: ls ./artifacts/**/*
+
+      - name: Download documentation artifact
+        id: download-documentation-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation
+          path: documentation
+
+      - name: List documentation generated
+        run: ls ./documentation/**/*
+
+      - name: Setup Pages for documentation
+        uses: actions/configure-pages@v3
+
+      - name: Upload documentation to pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./documentation
+
+      - name: Deploy documentation to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          draft: true
+          prerelease: false
+          files: |
+            artifacts/todayiwill/target/release/todayiwill
+            artifacts/PKGBUILD
+            artifacts/install-*
+            artifacts/uninstall-*
+          body: |
+            # Changelog
+
+            ${{ steps.github_release.outputs.changelog }}
