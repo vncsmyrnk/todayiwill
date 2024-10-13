@@ -1,10 +1,6 @@
 name: Release workflow
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
     # tags:
     #   - '*'
 
